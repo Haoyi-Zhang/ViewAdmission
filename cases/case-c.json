@@ -1,0 +1,60 @@
+{
+  "kind": "omitted-cross",
+  "log": [
+    {
+      "id": 1,
+      "r": [
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "s": [
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    }
+  ],
+  "durable_h": 1,
+  "certificate": {
+    "target": 1,
+    "r_cut": [],
+    "s_cut": [],
+    "anchor": {
+      "r": [],
+      "s": [],
+      "selection": [],
+      "joined": [],
+      "grouped": []
+    },
+    "recovered": {
+      "r": [
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "s": [
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "selection": [
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "joined": [],
+      "grouped": []
+    }
+  }
+}

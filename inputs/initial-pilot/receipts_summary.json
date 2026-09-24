@@ -1,0 +1,10 @@
+{
+  "mode": "pilot",
+  "cases": 120,
+  "receipt_only_ok": 48,
+  "wall_seconds": 0.0005811930000163557,
+  "cpu_seconds": 0.0,
+  "peak_rss_kib": 101676,
+  "workers": 1,
+  "observed_swap_kib": 0
+}

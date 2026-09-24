@@ -1,0 +1,17 @@
+{
+  "mode": "full",
+  "cases": 46800,
+  "root_atomic": 46800,
+  "reentry_ok": 46800,
+  "admitted_target_ok": 46800,
+  "service_gate_ok": 46800,
+  "commit_before_challenge_ok": 46800,
+  "challenge_before_admission_ok": 46800,
+  "unverified_publish_rejected": 46800,
+  "fallback_challenge_distinct_ok": 46800,
+  "wall_seconds": 4.3397911870001735,
+  "cpu_seconds": 4.33640814,
+  "peak_rss_kib": 132244,
+  "workers": 1,
+  "observed_swap_kib": 0
+}

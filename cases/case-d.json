@@ -1,0 +1,17 @@
+{
+  "kind": "ack-observation",
+  "server_before": {
+    "log_ids": [
+      1
+    ],
+    "durable_h": 1
+  },
+  "server_after": {
+    "log_ids": [
+      1
+    ],
+    "durable_h": 1
+  },
+  "receiver_before": 0,
+  "receiver_after": 1
+}

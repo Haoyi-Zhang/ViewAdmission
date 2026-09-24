@@ -1,0 +1,12 @@
+{
+  "mode": "pilot",
+  "cases": 625,
+  "three_term_ok": 625,
+  "two_term_ok": 625,
+  "without_cross_ok": 225,
+  "wall_seconds": 0.02196951500002342,
+  "cpu_seconds": 0.01999230299999999,
+  "peak_rss_kib": 94124,
+  "workers": 1,
+  "observed_swap_kib": 0
+}

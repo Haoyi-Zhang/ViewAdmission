@@ -1,0 +1,39 @@
+{
+  "steps": [
+    {
+      "step": "finite-sweep",
+      "returncode": 0,
+      "cpu_seconds": 27.080534,
+      "wall_seconds": 27.084608062999905
+    },
+    {
+      "step": "unit-tests",
+      "returncode": 0,
+      "cpu_seconds": 0.6201839999999996,
+      "wall_seconds": 0.6223352370002431
+    },
+    {
+      "step": "stored-cases",
+      "returncode": 0,
+      "cpu_seconds": 0.5678530000000018,
+      "wall_seconds": 0.568460266999864
+    },
+    {
+      "step": "end-to-end-demo",
+      "returncode": 0,
+      "cpu_seconds": 0.5988879999999994,
+      "wall_seconds": 0.5996299509997698
+    },
+    {
+      "step": "reconciliation",
+      "returncode": 0,
+      "cpu_seconds": 2.316149000000003,
+      "wall_seconds": 2.321849033000035
+    }
+  ],
+  "child_cpu_seconds": 31.183608000000003,
+  "wall_seconds": 31.198145231000126,
+  "peak_child_rss_kib": 155668,
+  "concurrent_workers": 1,
+  "comparison": "coverage and SQL controls"
+}

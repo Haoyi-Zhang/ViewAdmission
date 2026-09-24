@@ -1,0 +1,71 @@
+{
+  "status": "reconciled finite evidence for the declared model; theorem and literature claims remain separately reviewed",
+  "counts": {
+    "algebra": 625,
+    "cuts": 11529,
+    "publication": 46800,
+    "receipts": 120,
+    "soundness": 35,
+    "workloads": 180
+  },
+  "cut_outcomes": {
+    "selection_ok": 11529,
+    "join_ok": 11529,
+    "group_ok": 11529,
+    "full_checker_accepts": 11529,
+    "replay_ok": 11529,
+    "checked_replay_ok": 11529,
+    "prefix_checkpoint_ok": 11529,
+    "structural_ok": 11529,
+    "factorized_ok": 11529,
+    "factorized_r_rejected": 11529,
+    "factorized_s_rejected": 11529,
+    "factorized_selection_rejected": 11529,
+    "factorized_joined_rejected": 11529,
+    "factorized_grouped_rejected": 11529,
+    "checkpoint_only_ok": 96,
+    "no_cross_ok": 2290,
+    "poison_rejected": 11529,
+    "residual_preserved": 11529,
+    "fallback_ok": 11529,
+    "target_only_ok": 11529,
+    "target_only_poison_rejected": 11529,
+    "target_only_fallback_ok": 11529
+  },
+  "target_only_aggregation_comparison": {
+    "lower": 4093,
+    "equal": 1084,
+    "higher": 6352
+  },
+  "input_bounds": {
+    "5": {
+      "epochs": 5,
+      "max_prefix_join_absolute_envelope": 16,
+      "envelope_bits": 5
+    },
+    "16": {
+      "epochs": 16,
+      "max_prefix_join_absolute_envelope": 120,
+      "envelope_bits": 7
+    },
+    "64": {
+      "epochs": 64,
+      "max_prefix_join_absolute_envelope": 720,
+      "envelope_bits": 10
+    },
+    "256": {
+      "epochs": 256,
+      "max_prefix_join_absolute_envelope": 11180,
+      "envelope_bits": 14
+    }
+  },
+  "factorized_protocol": {
+    "rounds": 2,
+    "field_bits": 127,
+    "expected_join_pairs_enumerated": 0,
+    "mutations_checked": 57645,
+    "adaptive_controls": 32
+  },
+  "unit_of_cost": "epoch-component payload visits and candidate rows; timings are diagnostic",
+  "deep_sql_controls_checked": true
+}

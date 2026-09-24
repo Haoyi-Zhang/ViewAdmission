@@ -1,0 +1,65 @@
+{
+  "admission": "factorized",
+  "fallback_used": true,
+  "published": {
+    "r": [
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        2,
+        1
+      ]
+    ],
+    "s": [
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1
+      ]
+    ],
+    "selection": [
+      [
+        1,
+        2,
+        1
+      ]
+    ],
+    "joined": [
+      [
+        0,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        2,
+        1,
+        1
+      ]
+    ],
+    "grouped": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "metadata": {
+      "target": 5
+    }
+  },
+  "model": "logical atomic objects; no filesystem"
+}

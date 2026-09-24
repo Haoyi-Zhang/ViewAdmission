@@ -1,0 +1,27 @@
+{
+  "checked_cases": [
+    {
+      "case": "case-a.json",
+      "two_endpoint_accepts": true,
+      "target_only_accepts": true
+    },
+    {
+      "case": "case-b.json",
+      "two_endpoint_accepts": false,
+      "target_only_accepts": false
+    },
+    {
+      "case": "case-c.json",
+      "two_endpoint_accepts": false,
+      "target_only_accepts": false
+    },
+    {
+      "case": "case-d.json",
+      "server_indistinguishable": true
+    },
+    {
+      "case": "case-e.json",
+      "distinct_prefixes_equal_images": true
+    }
+  ]
+}

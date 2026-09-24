@@ -1,0 +1,20 @@
+{
+  "mode": "pilot",
+  "cases": 369,
+  "selection_ok": 369,
+  "join_ok": 369,
+  "group_ok": 369,
+  "full_checker_accepts": 369,
+  "replay_ok": 369,
+  "prefix_checkpoint_ok": 369,
+  "checkpoint_only_ok": 15,
+  "no_cross_ok": 158,
+  "poison_rejected": 369,
+  "residual_preserved": 369,
+  "fallback_ok": 369,
+  "wall_seconds": 0.19379717800006802,
+  "cpu_seconds": 0.19327205899999989,
+  "peak_rss_kib": 95020,
+  "workers": 1,
+  "observed_swap_kib": 0
+}

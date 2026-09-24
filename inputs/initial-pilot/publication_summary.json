@@ -1,0 +1,11 @@
+{
+  "mode": "pilot",
+  "cases": 19440,
+  "root_atomic": 19440,
+  "reentry_ok": 19440,
+  "wall_seconds": 1.4966759270000694,
+  "cpu_seconds": 1.492484585,
+  "peak_rss_kib": 101676,
+  "workers": 1,
+  "observed_swap_kib": 0
+}
