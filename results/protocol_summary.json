@@ -1,0 +1,14 @@
+{
+  "counts": {
+    "protocol_controls": 63,
+    "domain_controls": 17,
+    "tag_controls": 3,
+    "memory_controls": 9
+  },
+  "mod4_zeros": 56,
+  "mod4_assignments": 64,
+  "exact_probability_numerator": 9,
+  "exact_probability_denominator": 28948022309329048855892746252171976962977213799489202546401021394546514198529,
+  "ideal_bound_less_than_two_to_minus_250": true,
+  "memory_scope": "auxiliary allocations after resident inputs are built; store snapshots excluded and separately documented"
+}

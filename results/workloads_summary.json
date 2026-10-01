@@ -4,9 +4,9 @@
   "structural_ok": 180,
   "factorized_ok": 180,
   "all_views_ok": 180,
-  "wall_seconds": 0.9278584130001946,
-  "cpu_seconds": 0.9258118209999999,
-  "peak_rss_kib": 132244,
+  "wall_seconds": 1.6613904089999778,
+  "cpu_seconds": 1.6588640939999948,
+  "peak_rss_kib": 132012,
   "workers": 1,
   "observed_swap_kib": 0
 }

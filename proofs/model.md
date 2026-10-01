@@ -87,15 +87,17 @@ A candidate is one metadata target and exactly five relation arrays named
 `r`, `s`, `selection`, `joined`, and `grouped`.  Each relation:
 
 - has the fixed arity for its component;
-- contains only integer coordinates and weights within signed 64-bit input
-  bounds;
+- contains only integer coordinates and log weights in the symmetric range
+  [-M,M], M=2^63-1; -2^63 is deliberately outside this supported domain;
 - is lexicographically sorted;
 - has no duplicate tuple key;
 - has no zero weight;
 - is nonnegative for target admission.
 
-The canonical byte encoding is a compact, key-sorted UTF-8 JSON serialization of
-all five relations.  `commit_image` returns its SHA-256 digest.  The commitment
+The equation-checker encoding is a compact, key-sorted UTF-8 JSON serialization
+of all five relations. `commit_image` returns its SHA-256 digest. The Store
+additionally binds that complete image, its target metadata, and the trusted
+configuration in a separate store-level commitment.  The commitment
 is an executable binding mechanism, not a theorem of information-theoretic
 commitment and not a signature.
 
@@ -153,15 +155,23 @@ The candidate must be fixed before challenge generation.  If a challenge is
 known first, `adaptive_two_term_collision` constructs a nonzero two-term
 residual whose fingerprint is zero.
 
-## 7. Integer-to-field envelope
+## 7. Common integer domain and field lifting
 
-A nonzero integer residual must remain nonzero modulo `q`.  The checker derives
-conservative absolute coefficient and product bounds from the authority and
-candidate.  It rejects any accepted domain in which a relevant nonzero integer
-coefficient could be a multiple of `q` or an intermediate bound can reach the
-field modulus.  Python’s unbounded integer arithmetic is not used to justify a
-fixed-width overflow; signed 64-bit input validation and explicit envelope
-rejection are part of admission.
+Let M=2^63-1. In every target-admission mode the deduplicated authorized log
+must have total absolute variations V_R<=M, V_S<=M, and V_R*V_S<=M.
+Candidate coordinates and weights are range-checked before equations are used;
+stored weights must be positive and target bases are nonnegative in the
+completeness premise. The factorized checker does not independently reconstruct
+all base signs: disagreement with an invalid endpoint is covered by its random
+residual check, not by an exact sign certificate.
+
+The absolute variation bounds each true base/selection coefficient. Their
+product bounds every join coefficient and each grouped sum. The checker also
+requires every residual coefficient bound (true bound plus candidate bound) to
+be strictly below q. Thus a nonzero integer residual cannot vanish modulo q.
+Production q is fixed to the prime 2^127-1; composite moduli are rejected.
+This is a conservative common support, not all small final bags: R updates
++M,-M,+1 with a final S update +1 are rejected because V_R=2M+1.
 
 ## 8. Randomized guarantee
 
@@ -178,20 +188,35 @@ bugs, malicious authority/checker code, and physical persistence failures.
 
 ## 9. Publication state machine
 
-A generation consists of six immutable logical objects: five relations and
-metadata.  Metadata includes target marker, commitment, admission mode and
-parameters, and successful decision.  Objects become durable only through their
-individual modeled flush events.  The service root is one atomic pointer.
+A generation consists of five relation objects and metadata containing exactly
+the target marker. The untrusted metadata cannot assert a successful decision.
+A separate trusted Store session fixes the full candidate snapshot, authority,
+h, mode, rounds, FIELD, MAX_I64, query and encoding descriptor. The Store hashes
+the complete image together with its trusted configuration. Its admit method
+calls the actual configured checker and persists the decision in that session.
 
-The root may swing to a new generation only when all named objects are durable,
-the metadata marker equals the requested `h`, the commitment matches the exact
-candidate bytes, and admission is true.  A crash discards private unstaged or
-unflushed work but does not partially mutate an immutable durable object or the
-root.  Reentry uses the same authority/marker and passes the same gate.
+Objects become durable only through individual logical flush events. The
+bootstrap root is known empty at prefix zero. Every later root must bind the
+same complete objects and descriptor as a positive trusted decision. publish
+and read_committed both check this binding; object existence alone is not
+admission. A complete old root is not service for another requested h: a target
+mismatch is RecoveryPending.
 
-This abstraction intentionally omits filesystem reorderings, `fsync` semantics,
-sector tears, storage-controller caches, replication, concurrent writers,
-process races, garbage collection, and hardware corruption.
+A logical challenge event records its normalized seed before returning. A crash
+discards staging and the active pointer, but retains durable objects, sessions,
+seeds, decisions and the atomic root. A resumed session reuses its recorded
+challenge; a new fallback session must commit anew and use a distinct normalized
+seed. Test seeds are deterministic; probabilistic guarantees separately require
+fresh independent trusted challenges. Fallback shares the producer's rebase
+implementation and is not an independent replay implementation.
+
+The binding establishes decision provenance, not zero-error truth after random
+admission. Structural admission is exact on its support; randomized admission
+retains the stated fixed-candidate error and computational assumptions.
+
+This abstraction omits filesystem reorderings, fsync semantics, sector tears,
+storage-controller caches, replication, concurrent writers, process races,
+garbage collection, Python object-security isolation, and hardware corruption.
 
 ## 10. Trusted and untrusted elements
 
@@ -208,7 +233,7 @@ Untrusted / checked:
 - retained mixed-cut image;
 - recovery producer output;
 - all candidate bytes and metadata presented for admission;
-- fallback output until independently recommitted and admitted.
+- fallback output until separately recommitted and admitted with fresh challenges.
 
 Excluded:
 

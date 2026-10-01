@@ -107,8 +107,18 @@ def aggregate(log: dict, cut: list[int], name: str) -> dict:
             if absolute_bound > MAX_INT:
                 raise Rejected("log aggregate integer envelope exceeded")
             key = (k, value)
-            result[key] = result.get(key, 0) + weight
-    return {key: w for key, w in result.items() if w != 0}
+            value = result.get(key, 0) + weight
+            if value: result[key] = value
+            else: result.pop(key, None)
+    return result
+
+
+def target_domain(log: dict, h: int) -> None:
+    """Independent implementation of the shared conservative integer domain."""
+    ar = sum(abs(row[2]) for i in range(1,h+1) for row in log[i]["r"])
+    ass = sum(abs(row[2]) for i in range(1,h+1) for row in log[i]["s"])
+    if ar > MAX_INT or ass > MAX_INT or ar * ass > MAX_INT:
+        raise Rejected("authority signed-64 absolute-variation envelope exceeded")
 
 
 def verify(records: list[dict], durable_h: int, cert: Any,
@@ -123,6 +133,7 @@ def verify(records: list[dict], durable_h: int, cert: Any,
         raise Rejected("wrong certificate schema")
     if type(cert["target"]) is not int or cert["target"] != durable_h:
         raise Rejected("certificate target differs from independent marker")
+    target_domain(log, durable_h)
     anchor = decode_image(cert["anchor"])
     recovered = decode_image(cert["recovered"])
     r = aggregate(log, cert["r_cut"], "r")
@@ -153,6 +164,7 @@ def verify_replay(records: list[dict], durable_h: int, recovered: Any,
     p = list(range(1, durable_h + 1))
     if any(i not in log for i in p):
         raise Rejected("acknowledged prefix has a log hole")
+    target_domain(log, durable_h)
     got = decode_image(recovered)
     tr, ts = aggregate(log, p, "r"), aggregate(log, p, "s")
     if any(w < 0 for rel in (tr, ts) for w in rel.values()):

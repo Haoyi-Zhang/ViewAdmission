@@ -8,6 +8,12 @@
     "soundness": 35,
     "workloads": 180
   },
+  "control_counts": {
+    "protocol_controls": 63,
+    "domain_controls": 17,
+    "tag_controls": 3,
+    "memory_controls": 9
+  },
   "cut_outcomes": {
     "selection_ok": 11529,
     "join_ok": 11529,
@@ -19,10 +25,15 @@
     "structural_ok": 11529,
     "factorized_ok": 11529,
     "factorized_r_rejected": 11529,
+    "structural_r_rejected": 11529,
     "factorized_s_rejected": 11529,
+    "structural_s_rejected": 11529,
     "factorized_selection_rejected": 11529,
+    "structural_selection_rejected": 11529,
     "factorized_joined_rejected": 11529,
+    "structural_joined_rejected": 11529,
     "factorized_grouped_rejected": 11529,
+    "structural_grouped_rejected": 11529,
     "checkpoint_only_ok": 96,
     "no_cross_ok": 2290,
     "poison_rejected": 11529,

@@ -1,8 +1,8 @@
 {
-  "tests_run": 42,
+  "tests_run": 60,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
   "success": true,
-  "cpu_seconds": 0.04270605500000002
+  "cpu_seconds": 0.290956716
 }

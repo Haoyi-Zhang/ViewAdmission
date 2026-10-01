@@ -23,7 +23,82 @@ def require(test, message):
 
 
 def canonical_rows(rows):
-    return [{k:v for k,v in r.items() if not k.endswith("_ns")} for r in rows]
+    return [{k:v for k,v in r.items() if not k.endswith("_ns") and k != "aux_peak_bytes"} for r in rows]
+
+
+CONTROL_STAGES = ("protocol_controls", "domain_controls", "tag_controls", "memory_controls")
+
+
+def validate_controls(root, compare=None):
+    """Read back saved controls independently of the control generator."""
+    data = {name: read_rows(root, name) for name in CONTROL_STAGES}
+    summary = json.loads((root / "protocol_summary.json").read_text())
+    for name, rows in data.items():
+        require(summary["counts"][name] == len(rows), name + " summary count")
+        if compare is not None:
+            require(canonical_rows(rows) == canonical_rows(read_rows(compare, name)),
+                    name + " changed deterministic outputs")
+    base_cases = {"unadmitted-all-flushed", "wrong-marker", "forged-metadata",
+                  "challenge-before-commit", "admit-before-challenge", "stale-marker"}
+    for part in ("r", "s", "selection", "joined", "grouped", "metadata"):
+        base_cases.update({"after-admission-" + part, "after-publication-" + part})
+    expected = {(mode, case) for mode in ("structural", "factorized", "target")
+                for case in base_cases}
+    expected |= {("factorized", "fallback-cut-" + str(i)) for i in range(5)}
+    expected |= {("factorized", prefix + kind) for prefix in
+                 ("repeat-seed-", "equivalent-fallback-") for kind in ("bytes", "str")}
+    actual = [(r["mode"], r["case"]) for r in data["protocol_controls"]]
+    require(len(actual) == len(expected) and set(actual) == expected,
+            "protocol control identity/uniqueness")
+    require(all(r["rejected"] == "1" for r in data["protocol_controls"]),
+            "failed protocol rejection")
+
+    field = 2**127 - 1
+    expected = {(mode, case): int(case == "positive-endpoint")
+                for mode in ("target", "structural", "factorized")
+                for case in ("variation", "positive-endpoint", "negative-minimum", "negative-nonbag")}
+    expected.update({("factorized", "nonproduction-modulus-" + str(q)): 0
+                     for q in (4, 17, 101, True, field + 2)})
+    seen = set()
+    for row in data["domain_controls"]:
+        key = (row["mode"], row["case"])
+        require(key in expected and key not in seen, "domain control identity/uniqueness")
+        seen.add(key)
+        require(row["accepted"] == row["expected"] == str(expected[key]),
+                "domain control outcome")
+    require(seen == set(expected), "missing domain control")
+    tags = data["tag_controls"]
+    require(len(tags) == 3 and {r["case"] for r in tags} ==
+            {"key-payload-domain-merge", "omitted-join-equation", "sum-instead-of-product"},
+            "tag control identity/uniqueness")
+    require(all(r["correct_control"] == r["weakened_behavior_observed"] == "1" for r in tags),
+            "tag mutant not exposed")
+    expected = {("cartesian-fixed-K", str(n), mode) for n in (8, 32, 128)
+                for mode in ("structural", "factorized")}
+    expected |= {("cancellation", str(n), "aggregate") for n in (8, 32, 128)}
+    seen = set()
+    for row in data["memory_controls"]:
+        key = (row["family"], row["n"], row["mode"])
+        require(key in expected and key not in seen, "memory control identity/uniqueness")
+        seen.add(key); n = int(row["n"])
+        require(int(row["resident_input_rows"]) == 2*n, "memory input rows")
+        require(row["peak_keys"] == "1" and row["tag_cache_entries"] == "0", "memory structural count")
+        if row["family"] == "cartesian-fixed-K":
+            require(int(row["candidate_join_rows"]) == n*n and int(row["aux_peak_bytes"]) > 0,
+                    "Cartesian candidate/allocation count")
+        else:
+            require(row["candidate_join_rows"] == row["final_aggregate_entries"] == "0",
+                    "cancellation retained entries")
+    require(seen == expected, "missing memory control")
+    require(summary["mod4_zeros"] == 56 and summary["mod4_assignments"] == 64,
+            "composite-ring counterexample")
+    require(summary["exact_probability_numerator"] == 9 and
+            summary["exact_probability_denominator"] == field**2 and
+            summary["ideal_bound_less_than_two_to_minus_250"] is True,
+            "probability expression mismatch")
+    # Integer comparisons, rather than trusting a saved Boolean.
+    require(9 * 2**250 < field**2 and field**2 < 2**254, "probability inequality")
+    return {name: len(rows) for name, rows in data.items()}
 
 
 def main():
@@ -33,6 +108,7 @@ def main():
     ap.add_argument("--deep", action="store_true")
     ap.add_argument("--tex", type=Path)
     args=ap.parse_args()
+    control_counts=validate_controls(args.results, args.compare)
     data={s:read_rows(args.results,s) for s in STAGES}
     counts={"algebra":625,"cuts":5**6-4**6,"publication":5*math.factorial(6)*13,"receipts":120,"soundness":35,"workloads":180}
     for s, rows in data.items():
@@ -68,6 +144,8 @@ def main():
                 require(int(row[head+"_payload_visits"])==int(row[head+"_aggregation_visits"])+2*d.bit_count(),"payload total")
             for k in ("selection_ok","join_ok","group_ok","full_checker_accepts","replay_ok","checked_replay_ok","prefix_checkpoint_ok","structural_ok","factorized_ok","factorized_r_rejected","factorized_s_rejected","factorized_selection_rejected","factorized_joined_rejected","factorized_grouped_rejected","poison_rejected","residual_preserved","fallback_ok","target_only_ok","target_only_poison_rejected","target_only_fallback_ok"):
                 require(row[k]=="1","unexpected failure "+k)
+            for component in ("r","s","selection","joined","grouped"):
+                require(row["structural_"+component+"_rejected"]=="1","structural mutation")
             require(int(row["factorized_expected_join_pairs"])==0,"factorized checker enumerated expected join pairs")
             if args.deep:
                 ids=lambda m:[i+1 for i in range(5) if m&(1<<i)]
@@ -146,16 +224,18 @@ def main():
     totals={k:sum(int(r[k]) for r in cuts) for k in cuts[0] if k.endswith(("_ok","_rejected")) or k in {"full_checker_accepts","residual_preserved"}}
     better=sum(int(r["target_only_aggregation_visits"])<int(r["checked_replay_aggregation_visits"]) for r in cuts)
     tie=sum(int(r["target_only_aggregation_visits"])==int(r["checked_replay_aggregation_visits"]) for r in cuts)
-    result={"status":"reconciled finite evidence for the declared model; theorem and literature claims remain separately reviewed","counts":counts,"cut_outcomes":totals,
+    result={"status":"reconciled finite evidence for the declared model; theorem and literature claims remain separately reviewed","counts":counts,"control_counts":control_counts,"cut_outcomes":totals,
             "target_only_aggregation_comparison":{"lower":better,"equal":tie,"higher":len(cuts)-better-tie},"input_bounds":input_bounds,
             "factorized_protocol":{"rounds":2,"field_bits":127,"expected_join_pairs_enumerated":0,"mutations_checked":5*len(cuts),"adaptive_controls":len(adaptive)},
             "unit_of_cost":"epoch-component payload visits and candidate rows; timings are diagnostic","deep_sql_controls_checked":args.deep}
     print(json.dumps(result,indent=2))
     if args.tex:
-        macros={"AlgebraCases":625,"AlgebraOmissionFailures":400,"CutCases":len(cuts),"CutOmissionFailures":len(cuts)-totals["no_cross_ok"],
+        unit_report=json.loads((args.results/"unit_tests.json").read_text())
+        require(unit_report["success"] and unit_report["failures"]==unit_report["errors"]==unit_report["skipped"]==0,"unit report failure")
+        macros={"UnitTests":unit_report["tests_run"],"AlgebraCases":625,"AlgebraOmissionFailures":400,"CutCases":len(cuts),"CutOmissionFailures":len(cuts)-totals["no_cross_ok"],
                 "CheckpointFailures":len(cuts)-totals["checkpoint_only_ok"],"PublicationCases":counts["publication"],"ReceiptCases":120,"ReceiptFailures":72,
                 "ScaleRows":180,"TargetLower":better,"TargetEqual":tie,"TargetHigher":len(cuts)-better-tie,
-                "FactorizedMutations":5*len(cuts),"FactorizedMutationMisses":5*len(cuts)-sum(totals[k] for k in ("factorized_r_rejected","factorized_s_rejected","factorized_selection_rejected","factorized_joined_rejected","factorized_grouped_rejected")),
+                "StructuralMutations":5*len(cuts),"FallbackSchedules":sum(int(r["used_fallback"]) for r in data["publication"]),"DirectSchedules":sum(not int(r["used_fallback"]) for r in data["publication"]),"FactorizedMutations":5*len(cuts),"FactorizedMutationMisses":5*len(cuts)-sum(totals[k] for k in ("factorized_r_rejected","factorized_s_rejected","factorized_selection_rejected","factorized_joined_rejected","factorized_grouped_rejected")),
                 "AdaptiveCollisions":len(adaptive),"SoundnessGridAssignments":sum(int(r["assignments"]) for r in exact)}
         labels={16:"Sixteen",64:"SixtyFour",256:"TwoFiftySix"}
         for n in (16,64,256):

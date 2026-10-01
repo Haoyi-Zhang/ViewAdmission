@@ -1,0 +1,10 @@
+family,n,mode,resident_input_rows,candidate_join_rows,aux_peak_bytes,tag_cache_entries,peak_keys,final_aggregate_entries
+cartesian-fixed-K,8,structural,16,64,2656,0,1,
+cartesian-fixed-K,8,factorized,16,64,5702,0,1,
+cancellation,8,aggregate,16,0,,0,1,0
+cartesian-fixed-K,32,structural,64,1024,6388,0,1,
+cartesian-fixed-K,32,factorized,64,1024,5794,0,1,
+cancellation,32,aggregate,64,0,,0,1,0
+cartesian-fixed-K,128,structural,256,16384,23904,0,1,
+cartesian-fixed-K,128,factorized,256,16384,6770,0,1,
+cancellation,128,aggregate,256,0,,0,1,0

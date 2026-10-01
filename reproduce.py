@@ -10,11 +10,7 @@ import argparse, csv, hashlib, itertools, json, os, resource, sys, time
 from copy import deepcopy
 from pathlib import Path
 
-# One worker; reserve headroom for the interpreter, paper build, and packaging.
-if hasattr(os, "sched_getaffinity"):
-    os.sched_setaffinity(0, {min(os.sched_getaffinity(0))})
-resource.setrlimit(resource.RLIMIT_AS, (1024**3, 1024**3))
-resource.setrlimit(resource.RLIMIT_CPU, (120, 125))
+from resource_limits import constrain
 
 from recovery.algebra import evaluate, rebase, rebase_two_term, encode_image, plus, neg, pairs
 from recovery.engine import Epoch, log_index, operands, prefix, replay, prefix_checkpoint, certificate, guarded_recover, retarget
@@ -30,6 +26,8 @@ from recovery.factorized import (
 )
 
 BASE = Path(__file__).resolve().parent
+if not __debug__:
+    raise SystemExit("Experiment assertions require normal Python, not -O.")
 
 
 def load(name: str) -> list[Epoch]:
@@ -159,7 +157,11 @@ def cut_rows(n: int):
                                 rejected = 0
                             except FactorizedRejected:
                                 rejected = 1
+                            if not rejected: raise AssertionError("factorized mutant accepted")
                             mutation_flags["factorized_" + component + "_rejected"] = rejected
+                            try: verify_structural(records,h,mutation)
+                            except FactorizedRejected: mutation_flags["structural_"+component+"_rejected"]=1
+                            else: raise AssertionError("structural mutant accepted")
                         metadata = {key: cert[key] for key in ["target","r_cut","s_cut"]}
                         yield {"n":n,"durable_mask":dm,"r_mask":rm,"s_mask":sm,"h":h,
                                "selection_ok":int(got["selection"] == expected["selection"]),
@@ -188,87 +190,114 @@ def cut_rows(n: int):
     finally: oracle.close()
 
 
-def publication_rows(n: int):
-    """Enumerate crashes across commit/challenge/admission and atomic publish."""
-    log = log_index(load("small.json")[:n])
-    records = [epoch.encode() for epoch in log.values()]
-    initial = {**encode_image(replay(log,0)), "metadata":{"target":0}}
-    for h in range(1,n+1):
-        rc, sc = list(range(1,n+1,2)), list(range(2,n+1,2))
-        old = evaluate(*operands(log,rc,sc))
-        if h % 2: old.joined[(99,99,99)] = 1
-        primary_seed = challenge_seed("publication", h, "primary")
-        fallback_seed = challenge_seed("publication", h, "fallback")
-        admitted, used_fallback = guarded_recover(
-            log, h, rc, sc, old, admission="factorized",
-            seed=primary_seed, fallback_seed=fallback_seed)
-        assert used_fallback == bool(h % 2)
-        target = {**admitted["recovered"], "metadata":{"target":h}}
-        # Reentry admission depends on (h, cut), not on the later flush order.
-        # Compute each deterministic candidate/challenge pair once, then reuse
-        # that exact admitted target while enumerating all 6! storage orders.
-        # This is memoization of identical work, not a reduction in schedule
-        # coverage or a shared challenge across different candidate bytes.
-        restart_targets = {}
-        for cut in range(13):
-            restarted, restarted_fallback = guarded_recover(
-                log, h, rc, sc, old, admission="factorized",
-                seed=challenge_seed("restart", h, cut, "primary"),
-                fallback_seed=challenge_seed("restart", h, cut, "fallback"))
-            assert restarted_fallback == bool(h % 2)
-            restart_targets[cut] = {**restarted["recovered"], "metadata":{"target":h}}
+def must_reject(call, kind=ValueError):
+    try: call()
+    except kind: return 1
+    raise AssertionError("required rejection did not occur")
 
-        # Candidate construction, content commitment, post-commit challenge, and
-        # admission are explicit boundaries. None can publish a root.
-        for perm in itertools.permutations(PARTS):
-            events = ["build", "commit", "challenge", "admit", "prepare", *perm, "publish"]
-            for cut in range(len(events)+1):
-                store = Store(initial)
-                committed = challenged = verified = False
+
+def _publication_rows(n: int, targets=None, orders=None, cuts=range(13)):
+    """Coarse publication schedules; fine fallback cuts are tested separately."""
+    log=log_index(load("small.json")[:n]);records=[e.encode() for e in log.values()]
+    initial={**encode_image(replay(log,0)),"metadata":{"target":0}}
+    selected_targets = range(1,n+1) if targets is None else targets
+    selected_orders = tuple(itertools.permutations(PARTS)) if orders is None else tuple(orders)
+    selected_cuts = tuple(cuts)
+    for h in selected_targets:
+        rc,sc=list(range(1,n+1,2)),list(range(2,n+1,2))
+        old=evaluate(*operands(log,rc,sc))
+        if h%2: old.joined[(99,99,99)]=1
+        primary={**certificate(log,h,rc,sc,old)["recovered"],"metadata":{"target":h}}
+        fallback={**certificate(log,h,[],[],evaluate({},{}))["recovered"],"metadata":{"target":h}}
+        target={**encode_image(replay(log,h)),"metadata":{"target":h}}
+        target_ok=int(verify_replay(records,h,{k:target[k] for k in target if k!="metadata"}))
+        for perm in selected_orders:
+            events=["build","commit","challenge","admit","binding",*perm,"publish"]
+            for cut in selected_cuts:
+                counter=itertools.count()
+                store=Store(initial,records=records,target=h,
+                            _entropy=lambda:challenge_seed("publication",h,cut,next(counter)))
+                unverified=must_reject(store.publish)
+                precommit=must_reject(store.challenge)
+                prechallenge=must_reject(store.admit)
+                first_seed=None;distinct=True
+                def admit_or_fallback():
+                    nonlocal distinct
+                    try:store.admit();return False
+                    except FactorizedRejected:
+                        store.prepare(fallback);store.commit();replacement=store.challenge()
+                        distinct=distinct and replacement!=first_seed
+                        if not distinct:raise AssertionError("fallback seed reuse")
+                        store.admit();return True
                 for event in events[:cut]:
-                    if event == "build":
-                        pass
-                    elif event == "commit":
-                        committed = True
-                    elif event == "challenge":
-                        assert committed
-                        challenged = True
-                    elif event == "admit":
-                        assert challenged
-                        verified = True
-                    elif event == "prepare":
-                        assert verified
-                        store.prepare(target)
-                    elif event == "publish":
-                        store.publish()
-                    else:
-                        store.flush(event)
-                store.crash()
-                read = store.read()
-                published = cut == len(events)
-                assert read == (target if published else initial)
-                if published:
-                    assert store.read_committed(h) == target
-                else:
-                    try:
-                        store.read_committed(h)
-                        raise AssertionError("stale root served")
-                    except RecoveryPending:
-                        pass
-                # Re-entry uses the separately admitted candidate for this cut,
-                # then performs a complete immutable publication.
-                restarted_target = restart_targets[cut]
-                store.prepare(restarted_target)
-                for part in PARTS: store.flush(part)
-                store.publish(); store.crash()
-                assert store.read() == target == store.read_committed(h)
-                yield {"h":h,"flush_order":";".join(perm),"crash_cut":cut,
-                       "event_count":len(events),"root_atomic":1,"reentry_ok":1,
-                       "initial_root":int(not published),"admitted_target_ok":1,
-                       "service_gate_ok":1,"commit_before_challenge_ok":1,
-                       "challenge_before_admission_ok":1,"unverified_publish_rejected":1,
-                       "fallback_challenge_distinct_ok":int(primary_seed != fallback_seed),
-                       "used_fallback":int(used_fallback)}
+                    if event=="build":store.prepare(primary)
+                    elif event=="commit":
+                        store.commit();must_reject(store.admit)
+                    elif event=="challenge":first_seed=store.challenge()
+                    elif event=="admit":admit_or_fallback()
+                    elif event=="binding":
+                        if not store.admit():raise AssertionError("missing trusted decision")
+                    elif event=="publish":store.publish(h)
+                    else:store.flush(event)
+                store.crash();published=cut==12
+                atomic=int(store.read()==(target if published else initial))
+                if not atomic:raise AssertionError("mixed root")
+                gate=int(store.read_committed(h)==target) if published else must_reject(lambda:store.read_committed(h),RecoveryPending)
+                store.prepare(primary);store.commit();first_seed=store.challenge()
+                used=admit_or_fallback()
+                if used!=bool(h%2):raise AssertionError("wrong reentry path")
+                for part in PARTS:store.flush(part)
+                store.publish(h);store.crash();reentry=int(store.read_committed(h)==target)
+                if not reentry:raise AssertionError("reentry mismatch")
+                yield {"h":h,"flush_order":";".join(perm),"crash_cut":cut,"event_count":12,
+                       "root_atomic":atomic,"reentry_ok":reentry,"initial_root":int(not published),
+                       "admitted_target_ok":target_ok,"service_gate_ok":gate,
+                       "commit_before_challenge_ok":precommit,"challenge_before_admission_ok":prechallenge,
+                       "unverified_publish_rejected":unverified,"fallback_challenge_distinct_ok":int(distinct),
+                       "used_fallback":int(used)}
+
+
+def publication_rows(n: int, targets=None, orders=None, cuts=range(13), *, memoize=True):
+    """Execute every store transition; memoize only identical deterministic equations.
+
+    The test challenge bytes depend on target/cut/attempt, not on the object
+    flush permutation. Re-evaluating the same functional fingerprint equation
+    for all 720 permutations adds no new equation coverage. The cache key covers
+    every positional and keyword argument, including the entire candidate,
+    authority, commitment, seed and field parameters. Failed decisions are
+    re-raised; Store.admit, binding, publication, service and all rejection
+    assertions still execute for every schedule. This is test-harness reuse,
+    never a production-verifier shortcut. A paired regression disables reuse.
+    """
+    import copy
+    from unittest.mock import patch
+    import recovery.publication as publication
+    original = publication.verify_factorized
+    cache = {}; stats = {"evaluations": 0, "hits": 0}
+    def freeze(value):
+        if isinstance(value, dict):
+            return ("dict", tuple((k,freeze(v)) for k,v in sorted(value.items())))
+        if isinstance(value, (list,tuple)):
+            return (type(value).__name__, tuple(map(freeze,value)))
+        return (type(value).__name__, value)
+    def exact_reuse(*args, **kwargs):
+        key=(freeze(args),freeze(kwargs))
+        if not memoize or key not in cache:
+            stats["evaluations"] += 1
+            try: item=(True,original(*args,**kwargs))
+            except ValueError as exc: item=(False,(type(exc),tuple(exc.args)))
+            if memoize: cache[key]=item
+        else:
+            stats["hits"] += 1; item=cache[key]
+        if not item[0]:
+            error_type, error_args = item[1]
+            raise error_type(*error_args)
+        return copy.deepcopy(item[1])
+    with patch.object(publication,"verify_factorized",exact_reuse):
+        for row in _publication_rows(n,targets,orders,cuts):
+            row["equation_evaluations"]=stats["evaluations"]
+            row["equation_cache_hits"]=stats["hits"]
+            yield row
 
 
 def receipt_rows():
@@ -391,6 +420,7 @@ def summarize(path: Path) -> dict:
 
 
 def main() -> None:
+    constrain()
     parser = argparse.ArgumentParser()
     parser.add_argument("--out",type=Path,required=True)
     parser.add_argument("--mode",choices=["pilot","full"],default="full")

@@ -9,9 +9,9 @@
   "challenge_before_admission_ok": 46800,
   "unverified_publish_rejected": 46800,
   "fallback_challenge_distinct_ok": 46800,
-  "wall_seconds": 4.3397911870001735,
-  "cpu_seconds": 4.33640814,
-  "peak_rss_kib": 132244,
+  "wall_seconds": 56.21067226100001,
+  "cpu_seconds": 56.203709839,
+  "peak_rss_kib": 132012,
   "workers": 1,
   "observed_swap_kib": 0
 }

@@ -116,6 +116,7 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
     from .checker import verify, verify_replay, Rejected
     from .factorized import (
         FactorizedRejected,
+        _seed_bytes,
         commit_image,
         fresh_seed,
         verify_factorized,
@@ -143,6 +144,12 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
                 rounds=rounds,
             )
 
+    if admission == "factorized":
+        seed = fresh_seed() if seed is None else _seed_bytes(seed)
+        if fallback_seed is not None:
+            fallback_seed = _seed_bytes(fallback_seed)
+            if fallback_seed == seed:
+                raise ValueError("fallback_seed must be distinct after bytes/hex normalization")
     candidate = certificate(log, h, rc, sc, old)
     rejection = (Rejected, FactorizedRejected)
     try:
@@ -150,7 +157,8 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
         return candidate, False
     except rejection:
         fallback = certificate(log, h, [], [], evaluate({}, {}))
-        if admission == "factorized" and seed is not None and fallback_seed is None:
-            raise ValueError("deterministic factorized fallback requires a distinct fallback_seed")
+        if admission == "factorized" and fallback_seed is None:
+            fallback_seed = fresh_seed()
+            while fallback_seed == seed: fallback_seed = fresh_seed()
         admit(fallback, fallback_seed)
         return fallback, True

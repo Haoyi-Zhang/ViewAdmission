@@ -52,6 +52,8 @@ class FactorizedReport:
     distinct_join_keys: int
     expected_join_pairs_enumerated: int
     candidate_commitment: str
+    tag_cache_entries: int
+    peak_accumulator_keys: int
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -121,6 +123,10 @@ def _authority(records: Any, durable_h: Any) -> tuple[dict[int, dict[str, Any]],
         raise FactorizedRejected("invalid durable marker")
     if any(epoch_id not in log for epoch_id in range(1, h + 1)):
         raise FactorizedRejected("acknowledged prefix has a log hole")
+    ar = sum(abs(row[2]) for i in range(1,h+1) for row in log[i]["r"])
+    ass = sum(abs(row[2]) for i in range(1,h+1) for row in log[i]["s"])
+    if ar > MAX_INT or ass > MAX_INT or ar * ass > MAX_INT:
+        raise FactorizedRejected("authority signed-64 absolute-variation envelope exceeded")
     return log, h
 
 
@@ -132,7 +138,11 @@ def canonical_image_bytes(image: Any) -> bytes:
 
 def commit_image(image: Any) -> str:
     """Bind an immutable candidate before the verifier seed is sampled."""
-    return hashlib.sha256(canonical_image_bytes(image)).hexdigest()
+    checked = _image(image, nonnegative=True)
+    digest = hashlib.sha256()
+    for chunk in json.JSONEncoder(sort_keys=True, separators=(",", ":"), ensure_ascii=True).iterencode(checked):
+        digest.update(chunk.encode("ascii"))
+    return digest.hexdigest()
 
 
 def fresh_seed() -> bytes:
@@ -180,6 +190,16 @@ def _field_element(seed: bytes, round_index: int, domain: str, coordinates: tupl
         counter += 1
 
 
+def _join_term(key_tag: int, left: int, right: int) -> int:
+    return key_tag * left * right
+
+
+def _compare_fingerprints(expected: dict, observed: dict) -> None:
+    for name in RELATION_ARITIES:
+        if observed[name] != expected[name]:
+            raise FactorizedRejected(f"{name} fingerprint differs from authoritative replay")
+
+
 def _mod(value: int, q: int) -> int:
     return value % q
 
@@ -193,6 +213,16 @@ def _add(table: dict[int, list[int]], key: int, round_index: int, value: int,
 def verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
                       commitment: str, seed: bytes | str, rounds: int = 2,
                       q: int = FIELD) -> FactorizedReport:
+    """Fixed-prime equation check. Store enforces challenge timing/freshness."""
+    if type(q) is not int or q != FIELD:
+        raise FactorizedRejected("production field must be FIELD = 2^127-1")
+    return _verify_factorized(records, durable_h, recovered, commitment=commitment,
+                              seed=seed, rounds=rounds, q=q)
+
+
+def _verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
+                       commitment: str, seed: bytes | str, rounds: int = 2,
+                       q: int = FIELD, _tag_override=None) -> FactorizedReport:
     """Verify the target image without constructing the expected join.
 
     ``commitment`` must be computed before ``seed`` is sampled.  The function
@@ -203,10 +233,10 @@ def verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
     """
     if type(rounds) is not int or not 1 <= rounds <= 8:
         raise FactorizedRejected("round count must be in 1..8")
-    if type(q) is not int or q <= 3:
-        raise FactorizedRejected("invalid field")
+    if type(q) is not int or q not in (17, FIELD):
+        raise FactorizedRejected("unsupported field in private finite-test core")
     candidate = _image(recovered, nonnegative=True)
-    actual_commitment = hashlib.sha256(canonical_image_bytes(candidate)).hexdigest()
+    actual_commitment = commit_image(candidate)
     if not isinstance(commitment, str) or commitment != actual_commitment:
         raise FactorizedRejected("candidate commitment mismatch")
     challenge_seed = _seed_bytes(seed)
@@ -222,17 +252,13 @@ def verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
     prefix_rows = 0
 
     bound = challenge_seed + bytes.fromhex(actual_commitment)
-    tag_cache: dict[tuple[int, str, tuple[int, ...]], int] = {}
-
     def tag(round_index: int, domain: str, *coords: int) -> int:
-        # Binding the content identifier into the challenge prevents a caller
-        # from reusing the same derived challenge for different candidates.
-        # Coordinates recur across the authority and candidate scans, so cache
-        # derived field elements without changing the ideal-random-function model.
-        cache_key = (round_index, domain, tuple(coords))
-        if cache_key not in tag_cache:
-            tag_cache[cache_key] = _field_element(bound, round_index, domain, cache_key[2], q)
-        return tag_cache[cache_key]
+        # No payload cache. Resident inputs and key accumulators are counted separately.
+        value = (_field_element(bound, round_index, domain, tuple(coords), q)
+                 if _tag_override is None else _tag_override(round_index, domain, tuple(coords)))
+        if type(value) is not int or not 0 <= value < q:
+            raise FactorizedRejected("invalid injected field element")
+        return value
 
     # Authority scan.  Direct base/selection fingerprints need no target map;
     # join and group need only one accumulator per join key and round.
@@ -272,7 +298,7 @@ def verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
         for round_index in range(rounds):
             expected["joined"][round_index] = (
                 expected["joined"][round_index]
-                + tag(round_index, "join-key", key) * r_values[round_index] * s_values[round_index]
+                + _join_term(tag(round_index, "join-key", key), r_values[round_index], s_values[round_index])
             ) % q
             expected["grouped"][round_index] = (
                 expected["grouped"][round_index]
@@ -314,9 +340,7 @@ def verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
         if max_candidate[name] + true_bounds[name] >= q:
             raise FactorizedRejected(f"{name} coefficient envelope is not injective in the field")
 
-    for name in RELATION_ARITIES:
-        if observed[name] != expected[name]:
-            raise FactorizedRejected(f"{name} fingerprint differs from authoritative replay")
+    _compare_fingerprints(expected, observed)
 
     return FactorizedReport(
         accepted=True,
@@ -331,10 +355,12 @@ def verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
         distinct_join_keys=len(set(r_by_key) | set(s_by_key)),
         expected_join_pairs_enumerated=0,
         candidate_commitment=actual_commitment,
+        tag_cache_entries=0,
+        peak_accumulator_keys=len(set(r_by_key) | set(s_by_key)),
     )
 
 
-def _aggregate(log: dict[int, dict[str, Any]], h: int, side: str) -> dict[tuple[int, int], int]:
+def _aggregate(log: dict[int, dict[str, Any]], h: int, side: str, *, metrics=None) -> dict[tuple[int, int], int]:
     result: dict[tuple[int, int], int] = {}
     absolute = 0
     for epoch_id in range(1, h + 1):
@@ -343,8 +369,12 @@ def _aggregate(log: dict[int, dict[str, Any]], h: int, side: str) -> dict[tuple[
             if absolute > MAX_INT:
                 raise FactorizedRejected("authority integer envelope exceeded")
             pair = (key, value)
-            result[pair] = result.get(pair, 0) + weight
-    return {key: weight for key, weight in result.items() if weight}
+            value = result.get(pair, 0) + weight
+            if value: result[pair] = value
+            else: result.pop(pair, None)
+            if metrics is not None:
+                metrics["peak_entries"] = max(metrics.get("peak_entries", 0), len(result))
+    return result
 
 
 def _dict(rows: Iterable[list[int]]) -> dict[tuple[int, ...], int]:
@@ -358,16 +388,17 @@ def verify_structural(records: Any, durable_h: Any, recovered: Any) -> bool:
     the product of nonzero supports per key to establish join completeness.
     """
     candidate_rows = _image(recovered, nonnegative=True)
-    candidate = {name: _dict(rows) for name, rows in candidate_rows.items()}
+    def equals(rows, mapping):
+        return len(rows) == len(mapping) and all(mapping.get(tuple(row[:-1])) == row[-1] for row in rows)
     log, h = _authority(records, durable_h)
     r = _aggregate(log, h, "r")
     s = _aggregate(log, h, "s")
     if any(weight < 0 for relation in (r, s) for weight in relation.values()):
         raise FactorizedRejected("target prefix is not a valid bag")
-    if candidate["r"] != r or candidate["s"] != s:
+    if not equals(candidate_rows["r"], r) or not equals(candidate_rows["s"], s):
         raise FactorizedRejected("candidate base relation differs from authoritative replay")
     selection = {key: weight for key, weight in r.items() if key[1] % 2 == 0}
-    if candidate["selection"] != selection:
+    if not equals(candidate_rows["selection"], selection):
         raise FactorizedRejected("candidate selection differs from authoritative replay")
 
     r_by_key: dict[int, dict[int, int]] = {}
@@ -378,9 +409,9 @@ def verify_structural(records: Any, durable_h: Any, recovered: Any) -> bool:
         s_by_key.setdefault(key, {})[value] = weight
     expected_support = sum(len(values) * len(s_by_key.get(key, {}))
                            for key, values in r_by_key.items())
-    if len(candidate["joined"]) != expected_support:
+    if len(candidate_rows["joined"]) != expected_support:
         raise FactorizedRejected("candidate join support is incomplete or contains extras")
-    for (key, left, right), weight in candidate["joined"].items():
+    for key, left, right, weight in candidate_rows["joined"]:
         expected_weight = r_by_key.get(key, {}).get(left, 0) * s_by_key.get(key, {}).get(right, 0)
         if expected_weight == 0 or weight != expected_weight:
             raise FactorizedRejected("candidate join tuple is incorrect")
@@ -390,15 +421,15 @@ def verify_structural(records: Any, durable_h: Any, recovered: Any) -> bool:
         value = sum(r_by_key.get(key, {}).values()) * sum(s_by_key.get(key, {}).values())
         if value:
             grouped[(key,)] = value
-    if candidate["grouped"] != grouped:
+    if not equals(candidate_rows["grouped"], grouped):
         raise FactorizedRejected("candidate group result differs from authoritative replay")
     return True
 
 
 def finite_field_detection_counts(q: int = 17) -> list[dict[str, int | str]]:
     """Exact small-field controls for degree-1/2/3 single-monomial errors."""
-    if type(q) is not int or q < 5:
-        raise ValueError("q must be at least five")
+    if type(q) is not int or q != 17:
+        raise ValueError("finite control uses the fixed prime 17")
     rows: list[dict[str, int | str]] = []
     for component, degree in (("grouped", 1), ("base_or_selection", 2), ("joined", 3)):
         total = q ** degree
@@ -427,6 +458,8 @@ def adaptive_two_term_collision(seed: bytes | str, *, q: int = 101) -> dict[str,
     This is a finite-field negative control, not an admissible production image:
     it deliberately violates the post-commit timing contract.
     """
+    if type(q) is not int or q != 101:
+        raise ValueError("adaptive algebra control uses the fixed prime 101")
     seed_bytes = _seed_bytes(seed)
     commitment = hashlib.sha256(b"adaptive-control").digest()
     bound = seed_bytes + commitment

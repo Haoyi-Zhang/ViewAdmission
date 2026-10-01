@@ -2,9 +2,8 @@
 """Run the retained unit tests and emit a machine-readable result to stdout."""
 import json,os,resource,sys,time,unittest
 from pathlib import Path
-if hasattr(os,"sched_getaffinity"):os.sched_setaffinity(0,{min(os.sched_getaffinity(0))})
-resource.setrlimit(resource.RLIMIT_AS,(1024**3,1024**3))
-resource.setrlimit(resource.RLIMIT_CPU,(120,125))
+from resource_limits import constrain
+constrain(cpu_seconds=120)
 base=Path(__file__).resolve().parent
 start=time.process_time()
 suite=unittest.defaultTestLoader.discover(str(base/"tests"))

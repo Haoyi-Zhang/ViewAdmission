@@ -29,14 +29,18 @@ def main():
     cert,fallback=guarded_recover(log,5,rc,sc,old,admission=args.admission,**kwargs)
     initial={**encode_image(replay(log,0)),"metadata":{"target":0}}
     candidate={**cert["recovered"],"metadata":{"target":5}}
-    store=Store(initial);store.prepare(candidate)
+    store=Store(initial, records=records, target=5,
+                mode="target" if args.admission == "both" else args.admission,
+                _entropy=lambda: b"P"*32)
+    store.prepare(candidate)
+    session=store.commit();store.challenge();store.admit()
     for part in PARTS[:3]:store.flush(part)
     store.crash();assert store.read()==initial
     try:
         store.read_committed(5)
         raise AssertionError("served stale root")
     except RecoveryPending:pass
-    store.prepare(candidate)
+    store.resume(session)
     for part in PARTS:store.flush(part)
     store.publish();store.crash();assert store.read()==candidate==store.read_committed(5)
     print(json.dumps({"admission":args.admission,"fallback_used":fallback,"published":store.read(),"model":"logical atomic objects; no filesystem"},indent=2))

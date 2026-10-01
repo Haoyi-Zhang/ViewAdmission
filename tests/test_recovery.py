@@ -128,15 +128,16 @@ class RecoveryTests(unittest.TestCase):
         finally: o.close()
 
     def test_publication_fence(self):
-        old = {part: [0] for part in PARTS}
-        new = {part: [1] for part in PARTS}
-        store = Store(old); store.prepare(new)
+        old = {**encode_image(replay(self.log,0)), "metadata":{"target":0}}
+        new = {**encode_image(replay(self.log,5)), "metadata":{"target":5}}
+        store = Store(old, records=self.records, target=5, mode="structural")
+        store.prepare(new); sid=store.commit();store.challenge();store.admit()
         for part in PARTS[:-1]: store.flush(part)
         with self.assertRaises(ValueError): store.publish()
         store.crash(); self.assertEqual(store.read(), old)
-        store.prepare(new)
+        store.resume(sid)
         for part in PARTS: store.flush(part)
-        store.publish(); store.crash(); self.assertEqual(store.read(), new)
+        store.publish();store.crash();self.assertEqual(store.read(),new)
 
     def test_independently_checked_replay(self):
         for h in range(6):
@@ -188,9 +189,9 @@ class RecoveryTests(unittest.TestCase):
     def test_stale_root_not_served(self):
         initial={**encode_image(replay(self.log,0)),"metadata":{"target":0}}
         target={**encode_image(replay(self.log,5)),"metadata":{"target":5}}
-        store=Store(initial)
+        store=Store(initial, records=self.records, target=5)
         with self.assertRaises(RecoveryPending):store.read_committed(5)
-        store.prepare(target)
+        store.prepare(target);store.commit();store.challenge();store.admit()
         for part in PARTS:store.flush(part)
         store.publish()
         self.assertEqual(store.read_committed(5),target)
@@ -198,7 +199,7 @@ class RecoveryTests(unittest.TestCase):
 
     def test_metadata_is_not_boolean_prefix(self):
         image={**encode_image(replay(self.log,0)),"metadata":{"target":False}}
-        with self.assertRaises(RecoveryPending):Store(image).read_committed(0)
+        with self.assertRaises(ValueError):Store(image).read_committed(0)
 
     def test_client_receipt_not_server_marker(self):
         server_before_receipt = {"log":[1], "commit":1}

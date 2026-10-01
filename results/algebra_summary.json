@@ -4,9 +4,9 @@
   "three_term_ok": 625,
   "two_term_ok": 625,
   "without_cross_ok": 225,
-  "wall_seconds": 0.023757211999964056,
-  "cpu_seconds": 0.023989189999999994,
-  "peak_rss_kib": 95020,
+  "wall_seconds": 0.0237029549999761,
+  "cpu_seconds": 0.02398337899999997,
+  "peak_rss_kib": 95272,
   "workers": 1,
   "observed_swap_kib": 0
 }

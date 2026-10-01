@@ -3,37 +3,43 @@
     {
       "step": "finite-sweep",
       "returncode": 0,
-      "cpu_seconds": 27.080534,
-      "wall_seconds": 27.084608062999905
+      "cpu_seconds": 89.295399,
+      "wall_seconds": 89.313009394
+    },
+    {
+      "step": "boundary-controls",
+      "returncode": 0,
+      "cpu_seconds": 4.1089329999999915,
+      "wall_seconds": 4.11097190800001
     },
     {
       "step": "unit-tests",
       "returncode": 0,
-      "cpu_seconds": 0.6201839999999996,
-      "wall_seconds": 0.6223352370002431
+      "cpu_seconds": 4.554115000000006,
+      "wall_seconds": 4.561390912999968
     },
     {
       "step": "stored-cases",
       "returncode": 0,
-      "cpu_seconds": 0.5678530000000018,
-      "wall_seconds": 0.568460266999864
+      "cpu_seconds": 0.5369590000000026,
+      "wall_seconds": 0.5374114460000783
     },
     {
       "step": "end-to-end-demo",
       "returncode": 0,
-      "cpu_seconds": 0.5988879999999994,
-      "wall_seconds": 0.5996299509997698
+      "cpu_seconds": 0.6436910000000006,
+      "wall_seconds": 0.644185847000017
     },
     {
       "step": "reconciliation",
       "returncode": 0,
-      "cpu_seconds": 2.316149000000003,
-      "wall_seconds": 2.321849033000035
+      "cpu_seconds": 2.597874999999994,
+      "wall_seconds": 2.5985596700000997
     }
   ],
-  "child_cpu_seconds": 31.183608000000003,
-  "wall_seconds": 31.198145231000126,
-  "peak_child_rss_kib": 155668,
+  "child_cpu_seconds": 101.736972,
+  "wall_seconds": 101.76651585299999,
+  "peak_child_rss_kib": 234784,
   "concurrent_workers": 1,
-  "comparison": "coverage and SQL controls"
+  "comparison": "all deterministic raw columns; timings excluded"
 }

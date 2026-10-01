@@ -1,9 +1,9 @@
 {
   "mode": "full",
   "cases": 35,
-  "wall_seconds": 0.0015055630001370446,
-  "cpu_seconds": 0.0,
-  "peak_rss_kib": 132244,
+  "wall_seconds": 0.0016452279999157327,
+  "cpu_seconds": 0.0007773330000020451,
+  "peak_rss_kib": 132012,
   "workers": 1,
   "observed_swap_kib": 0
 }

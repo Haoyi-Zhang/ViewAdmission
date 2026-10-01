@@ -74,13 +74,26 @@ N_J = sum_k |supp R_h(k,.)| * |supp S_h(k,.)|.
 
 Every nonzero expected product has one key in this support set.  If all supplied
 rows have the correct key/weight and the number of supplied keys is exactly
-`N_J`, no expected key can be missing and no extra key can be present.  Summing
-the admitted join by `k` and comparing the candidate group fixes the final
-component.  Thus acceptance is equivalent to the exact five-relation image.
+`N_J`, no expected key can be missing and no extra key can be present.  Computing each grouped weight as the product of the two authoritative
+per-key base masses and comparing it with the candidate group fixes the final
+component; no second scan or copy of the candidate join is required.  Within the common supported integer domain, acceptance is equivalent to the
+exact five-relation image.
 
-The checker builds base maps and scans source/candidate rows once: expected
-`O(L+C)` dictionary time and `O(|supp R_h|+|supp S_h|)` auxiliary space.  It does
-not build the expected join, although it reads the supplied join.
+The checker builds per-key base maps and scans source/candidate rows in expected
+O(L+C) dictionary time, plus ID normalization. Let H_R and H_S count the peak
+base-map tuple slots during prefix aggregation, including keys later reduced
+to zero; E counts epoch metadata and K_hist historical join keys. Its auxiliary
+state is O(E+H_R+H_S+K_hist), not simply the final support. It does not build an
+expected join or copy the candidate join inside verify_structural. Resident
+candidate inputs and complete Store snapshots remain O(C) outside that checker.
+The production factorized checker recomputes coordinate tags and has no
+payload cache. Its auxiliary state is O(E+r*K_hist), including historical keys
+whose final sums vanish. With at most A retained attempts and at most C rows
+per candidate, Store snapshots and generations additionally occupy O(A*C)
+state, besides resident authority and producer state. Deterministic equation
+memoization exists only in the finite test harness, not in this checker. The
+space controls include fixed key count with growing payloads, Cartesian joins,
+and canceling logs (results/memory_controls.csv).
 
 **Executable correspondence.**
 
@@ -119,8 +132,10 @@ join because every supplied byte must be bound and inspected.
 
 ## E. Completeness and fixed-candidate soundness
 
-For the correct image, every direct candidate fingerprint equals its independently
-computed expectation, so completeness is perfect.
+For the correct image on the common supported domain in model.md Section 7,
+every direct candidate fingerprint equals its independently computed expectation,
+so completeness is perfect. Domain rejection is not a false negative under
+this conditional completeness statement.
 
 For an incorrect candidate, choose one nonzero component residual.  Base and
 selection residual fingerprints have degree at most two, join residuals degree
@@ -149,8 +164,8 @@ It is not a guarantee against choosing `C` after learning `challenge`.
   exact expected root counts;
 - `adaptive_two_term_collision` constructs a nonzero residual after seeing a
   challenge; 32/32 campaign controls succeed;
-- 57,645 one-component mutations (each of five components over 11,529 endpoints)
-  are rejected with zero observed misses;
+- 57,645 one-component mutations per mode (five components over 11,529 endpoints)
+  are rejected separately by structural and factorized admission;
 - `tests/test_factorized.py::test_small_field_refuses_noninjective_integer_envelope`
   checks envelope rejection.
 
@@ -162,9 +177,11 @@ failure probability estimate.
 The protocol must bind the exact bytes later scanned by the verifier.  Binding
 only the join would let a producer change a base, selection, group, metadata, or
 encoding after learning tags while keeping join bytes fixed.  Canonical
-serialization plus one digest over all five arrays prevents this lifecycle
-ambiguity under the executable hash assumption.  Parsing, commitment checking,
-and metadata validation occur before authority/candidate comparisons.
+serialization binds the five arrays at the equation-checker interface. The
+Store separately binds the full image, metadata, authority and fixed checker
+configuration, preventing lifecycle ambiguity under the executable hash
+assumption. It validates metadata before invoking the equation checker and
+revalidates the complete binding at publication and service.
 
 If a producer is rejected and replay fallback is used, the fallback has new
 provenance and can have different bytes.  It is therefore serialized and
@@ -177,9 +194,16 @@ reintroduce the endpoint gap at the fallback boundary.
   `recovery/factorized.py`;
 - `guarded_recover` in `recovery/engine.py`;
 - commitment/seed validation and fallback tests in `tests/test_factorized.py`;
-- all 46,800 publication rows record commit-before-challenge,
-  challenge-before-admission, unverified-publish rejection, and distinct
-  fallback challenge.
+- 46,800 publication rows exercise commit-before-challenge, challenge-before-admission,
+  and unverified-publish rejection. Exactly 28,080 take a fallback with a new
+  commitment/challenge; 18,720 take a direct path. A fallback-only condition is
+  vacuous on direct rows. Five additional fine fallback cuts are tested
+  separately, not crossed with every flush order.
+- The 1/33/817 product-polynomial counts and 32/32 adaptive collisions are algebra
+  controls, not complete-admission attacks or tag-separation tests. The separate
+  test-only tag injection executes actual fingerprint equations with complete
+  canonical candidates and matched envelopes; relation omission, domain mixing,
+  and wrong factorization are required to fail. Production rejects small q.
 
 ## G. No-synopsis read lower bound
 
@@ -208,8 +232,8 @@ expansion,” never “sublinear verification.”
 
 Use three invariants:
 
-1. **Root validity:** the current service root names a complete admitted
-   generation.
+1. **Root validity:** the root is the fixed empty bootstrap at zero, or names
+   a complete candidate bound to a positive trusted admission decision.
 2. **Private construction:** staged/partially flushed candidate objects are not
    reachable from the root.
 3. **Monotone gate:** for an admitted generation, commitment, marker, object
@@ -217,11 +241,16 @@ Use three invariants:
 
 Build, commit, challenge, verify, and individual object flushes do not change the
 root, so they preserve the invariants.  The root swing is guarded by durability
-of all named immutable objects plus matching admitted metadata, so its atomic
+of all named immutable objects plus a matching trusted session decision and descriptor, so its atomic
 execution establishes the invariants for the new root.  A crash can discard
 private state but leaves the old atomic root and immutable durable objects.
-Reentry begins from that valid root and must pass the same gate before another
-swing.
+Reentry begins from that complete root and must pass the same gate before
+another swing. Service additionally requires the root target to equal the
+requested h; otherwise it raises RecoveryPending. An old complete root cannot
+answer a new-target request. Randomized admission makes this a decision-binding
+invariant with probabilistic semantic soundness, not a zero-error semantic
+invariant. For A adaptive attempts with fresh independent post-commit challenges,
+a union bound gives at most A*(3/q)^r; repeated reads are not additional trials.
 
 **Executable correspondence.**
 
