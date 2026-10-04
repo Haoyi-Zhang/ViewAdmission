@@ -290,5 +290,4 @@ The artifact establishes exact results for its frozen finite domains, execution
 paths, and logical schedules.  It does not establish workload prevalence,
 production speed, public authenticity, storage physics, or generalized SQL
 coverage.  The paper’s algebraic and lower-bound proofs are human-readable
-arguments, not proof-assistant output.  Review of this packet is a self-audit,
-not independent validation.
+arguments, not proof-assistant output.
