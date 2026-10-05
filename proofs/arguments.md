@@ -175,7 +175,7 @@ It is not a guarantee against choosing `C` after learning `challenge`.
 - 57,645 one-component mutations per mode (five components over 11,529 endpoints)
   are rejected separately by structural and factorized admission;
 - `tests/test_factorized.py::test_small_field_refuses_noninjective_integer_envelope`
-  checks envelope rejection.
+  checks rejection of a nonproduction modulus before the integer-envelope check.
 
 Observed zero misses do not replace the theorem and do not justify an empirical
 failure probability estimate.

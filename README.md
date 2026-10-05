@@ -45,6 +45,10 @@ Resident inputs and the store's complete-candidate snapshots count toward total
 memory. The prime-field error bound is conditional on a fixed supported
 candidate and fresh independent challenges; binding does not make it zero error.
 
+The saved unit-test report records 60 passing tests; the current source defines
+66 discoverable methods. The retained pass count covers that saved run, not a
+verified run of the entire current suite.
+
 The retained results/execution.json records the frozen run, and a fresh output
 has its own execution.json. verify_results.py reconciles saved raw rows; it does
 not infer new executions from past pass markers. Full output must match the
