@@ -107,9 +107,9 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
     fresh post-commit challenge.  A rejected fallback is checked again.
 
     Supplying seeds is only for deterministic experiments.  If factorized
-    admission reaches the fallback, a distinct ``fallback_seed`` is required so
-    that the fallback is fixed before its challenge.  With no supplied seeds,
-    both challenges are sampled locally after the corresponding commitment.
+    admission reaches the fallback, any supplied ``fallback_seed`` must differ
+    from the first challenge.  Unsupplied challenges are sampled locally after
+    the corresponding commitment; distinct bytes alone do not imply independence.
     Missing or malformed authoritative inputs remain errors: fallback never
     bypasses admission.
     """
@@ -125,8 +125,10 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
     if admission not in {"both", "target", "structural", "factorized"}:
         raise ValueError("admission must be both, target, structural, or factorized")
     records = [e.encode() for e in log.values()]
+    used_seed: bytes | None = None
 
     def admit(candidate: dict, challenge: bytes | str | None) -> None:
+        nonlocal used_seed
         if admission == "both":
             verify(records, h, candidate, oracle)
         elif admission == "target":
@@ -135,17 +137,24 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
             verify_structural(records, h, candidate["recovered"])
         else:
             commitment = commit_image(candidate["recovered"])
+            current_seed = fresh_seed() if challenge is None else _seed_bytes(challenge)
+            if challenge is None:
+                while current_seed == used_seed:
+                    current_seed = fresh_seed()
+            elif current_seed == used_seed:
+                raise ValueError("fallback_seed must be distinct after bytes/hex normalization")
+            used_seed = current_seed
             verify_factorized(
                 records,
                 h,
                 candidate["recovered"],
                 commitment=commitment,
-                seed=fresh_seed() if challenge is None else challenge,
+                seed=current_seed,
                 rounds=rounds,
             )
 
     if admission == "factorized":
-        seed = fresh_seed() if seed is None else _seed_bytes(seed)
+        seed = None if seed is None else _seed_bytes(seed)
         if fallback_seed is not None:
             fallback_seed = _seed_bytes(fallback_seed)
             if fallback_seed == seed:
@@ -157,8 +166,5 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
         return candidate, False
     except rejection:
         fallback = certificate(log, h, [], [], evaluate({}, {}))
-        if admission == "factorized" and fallback_seed is None:
-            fallback_seed = fresh_seed()
-            while fallback_seed == seed: fallback_seed = fresh_seed()
         admit(fallback, fallback_seed)
         return fallback, True

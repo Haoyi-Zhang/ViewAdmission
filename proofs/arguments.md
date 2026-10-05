@@ -53,6 +53,14 @@ Every nonzero residual is preserved.  A transition equation can prove that the
 producer applied its own delta but cannot establish target equality unless it
 also establishes a valid anchor.
 
+The fixed-additive map above coincides with the executable bilinear rebase when
+the retained bases R and S are correct; the derived-view components may contain
+arbitrary additive errors. With base errors E_R and E_S, the executable join
+residual gains J(d_R,E_S)+J(E_R,d_S), and its grouped residual gains the grouped
+image of those terms. Full component-wise residual invariance therefore does
+not hold for arbitrary base corruption. Independent target admission is still
+needed; the following controls keep retained bases correct and poison the join.
+
 **Executable correspondence.**
 
 - `tests/test_recovery.py::test_poison_is_not_healed`;
