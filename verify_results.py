@@ -29,6 +29,41 @@ def canonical_rows(rows):
 CONTROL_STAGES = ("protocol_controls", "domain_controls", "tag_controls", "memory_controls")
 
 
+def validate_soundness(rows):
+    """Require the exact frozen control identities and their arithmetic fields."""
+    degrees = {"grouped": 1, "base_or_selection": 2, "joined": 3}
+    expected = {("exact_grid", case) for case in degrees}
+    expected |= {("adaptive_collision", str(i)) for i in range(32)}
+    seen = set()
+    exact, adaptive = [], []
+    for row in rows:
+        key = (row["kind"], row["case"])
+        require(key in expected and key not in seen, "soundness control identity/uniqueness")
+        seen.add(key)
+        if key[0] == "exact_grid":
+            degree, q = degrees[key[1]], 17
+            total = q**degree
+            zeros = total - (q - 1)**degree
+            values = {"degree": degree, "rounds": 1, "field": q,
+                      "assignments": total, "undetected": zeros,
+                      "detected": total - zeros, "bound_numerator": degree,
+                      "bound_denominator": q, "residual_nonzero": 1,
+                      "fingerprint_zero": 1, "collision_constructed": 0}
+            require(zeros <= degree * q**(degree - 1), "Schwartz-Zippel control")
+            exact.append(row)
+        else:
+            values = {"degree": 3, "rounds": 1, "field": 101,
+                      "assignments": 1, "undetected": 1, "detected": 0,
+                      "bound_numerator": 3, "bound_denominator": 101,
+                      "residual_nonzero": 1, "fingerprint_zero": 1,
+                      "collision_constructed": 1}
+            adaptive.append(row)
+        for name, value in values.items():
+            require(row[name] == str(value), "soundness arithmetic field " + name)
+    require(seen == expected, "missing soundness control")
+    return exact, adaptive
+
+
 def validate_controls(root, compare=None):
     """Read back saved controls independently of the control generator."""
     data = {name: read_rows(root, name) for name in CONTROL_STAGES}
@@ -183,16 +218,7 @@ def main():
         require(int(row["used_fallback"])==int(row["h"])%2,"publication admission path")
         require(int(row["initial_root"])==int(int(row["crash_cut"])<12),"publication root selection")
 
-    exact=[r for r in data["soundness"] if r["kind"]=="exact_grid"]
-    adaptive=[r for r in data["soundness"] if r["kind"]=="adaptive_collision"]
-    require(len(exact)==3 and len(adaptive)==32,"soundness case partition")
-    for row in exact:
-        q=int(row["field"]); degree=int(row["degree"])
-        require(q==17 and int(row["assignments"])==q**degree,"small-field assignment count")
-        exact_zeros=q**degree-(q-1)**degree
-        require(int(row["undetected"])==exact_zeros,"small-field zero count")
-        require(exact_zeros<=degree*q**(degree-1),"Schwartz-Zippel control")
-    require(all(r["residual_nonzero"]==r["fingerprint_zero"]==r["collision_constructed"]=="1" for r in adaptive),"adaptive collision control")
+    exact, adaptive = validate_soundness(data["soundness"])
 
     actual={(r["write_order"],int(r["crash_cut"])) for r in data["receipts"]}
     require(actual=={(";".join(p),i) for p in itertools.permutations(("r","s","j","seen")) for i in range(5)},"receipt coverage")

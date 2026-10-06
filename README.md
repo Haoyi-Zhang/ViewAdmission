@@ -46,7 +46,7 @@ memory. The prime-field error bound is conditional on a fixed supported
 candidate and fresh independent challenges; binding does not make it zero error.
 
 The saved unit-test report records 60 passing tests; the current source defines
-66 discoverable methods. The retained pass count covers that saved run, not a
+76 discoverable methods. The retained pass count covers that saved run, not a
 verified run of the entire current suite.
 
 The retained results/execution.json records the frozen run, and a fresh output
@@ -55,3 +55,15 @@ not infer new executions from past pass markers. Full output must match the
 frozen semantic columns; timing/allocation diagnostics may differ by host.
 Proofs, support conditions, baseline definitions and event boundaries are in
 proofs/model.md, proofs/arguments.md and claim_evidence_ledger.csv.
+
+`verify_results.py` checks the distinct degree-1/2/3 control identities, all
+32 adaptive-control identities, and their arithmetic fields, in addition to
+endpoint and publication coverage. It does not turn algebra controls into an
+empirical estimate of production false acceptance. Complexity accounting
+distinguishes all raw epoch records/rows from the deduplicated prefix rows.
+
+The scientific workflow is configured to run the complete command from this flat artifact
+repository root on Ubuntu 24.04/Python 3.12, with a 900-second whole-command
+wall limit, one worker, and a 1 GiB address-space cap. It retains raw output
+and the command transcript even on failure. The separate repository-integrity
+workflow checks source/configuration syntax only.

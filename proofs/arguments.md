@@ -87,8 +87,14 @@ per-key base masses and comparing it with the candidate group fixes the final
 component; no second scan or copy of the candidate join is required.  Within the common supported integer domain, acceptance is equivalent to the
 exact five-relation image.
 
-The checker builds per-key base maps and scans source/candidate rows in expected
-O(L+C) dictionary time, plus ID normalization. Let H_R and H_S count the peak
+Let N count raw epoch records, L_all all their rows including repeated and
+unacknowledged records, and L_h rows in the deduplicated authorized prefix.
+Structural checking takes expected O(N+L_all+C) dictionary time, including ID
+normalization; factorized checking takes O(N+L_all+r*(L_h+C)) dictionary/tag
+operations on the fixed-width domain. Repeated empty epochs still cost N
+record inspections, and h=0 does not eliminate parsing. No worst-case tag
+rejection-sampling latency or unrestricted-integer bit bound is asserted.
+Let H_R and H_S count the peak
 base-map tuple slots during prefix aggregation, including keys later reduced
 to zero; E counts epoch metadata and K_hist historical join keys. Its auxiliary
 state is O(E+H_R+H_S+K_hist), not simply the final support. It does not build an
