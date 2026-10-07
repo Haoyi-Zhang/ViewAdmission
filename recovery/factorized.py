@@ -246,8 +246,8 @@ def _verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
     observed = {name: [0] * rounds for name in RELATION_ARITIES}
     r_by_key: dict[int, list[int]] = {}
     s_by_key: dict[int, list[int]] = {}
-    r_count_by_key: dict[int, list[int]] = {}
-    s_count_by_key: dict[int, list[int]] = {}
+    r_count_by_key: dict[int, int] = {}
+    s_count_by_key: dict[int, int] = {}
     l1_r = l1_s = 0
     prefix_rows = 0
 
@@ -273,6 +273,8 @@ def _verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
                     l1_s += abs(weight)
                 if l1_r >= q or l1_s >= q:
                     raise FactorizedRejected("authority integer envelope exceeds field")
+                counts = r_count_by_key if side == "r" else s_count_by_key
+                counts[key] = (counts.get(key, 0) + weight) % q
                 for round_index in range(rounds):
                     if side == "r":
                         term = weight * tag(round_index, "r-key", key) * tag(round_index, "r-value", value)
@@ -282,19 +284,17 @@ def _verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
                             expected["selection"][round_index] = (expected["selection"][round_index] + sel) % q
                         _add(r_by_key, key, round_index,
                              weight * tag(round_index, "join-r-value", value), rounds, q)
-                        _add(r_count_by_key, key, round_index, weight, rounds, q)
                     else:
                         term = weight * tag(round_index, "s-key", key) * tag(round_index, "s-value", value)
                         expected["s"][round_index] = (expected["s"][round_index] + term) % q
                         _add(s_by_key, key, round_index,
                              weight * tag(round_index, "join-s-value", value), rounds, q)
-                        _add(s_count_by_key, key, round_index, weight, rounds, q)
 
     for key in set(r_by_key) | set(s_by_key):
         r_values = r_by_key.get(key, [0] * rounds)
         s_values = s_by_key.get(key, [0] * rounds)
-        r_counts = r_count_by_key.get(key, [0] * rounds)
-        s_counts = s_count_by_key.get(key, [0] * rounds)
+        r_count = r_count_by_key.get(key, 0)
+        s_count = s_count_by_key.get(key, 0)
         for round_index in range(rounds):
             expected["joined"][round_index] = (
                 expected["joined"][round_index]
@@ -302,7 +302,7 @@ def _verify_factorized(records: Any, durable_h: Any, recovered: Any, *,
             ) % q
             expected["grouped"][round_index] = (
                 expected["grouped"][round_index]
-                + tag(round_index, "group-key", key) * r_counts[round_index] * s_counts[round_index]
+                + tag(round_index, "group-key", key) * r_count * s_count
             ) % q
 
     max_candidate = {name: 0 for name in RELATION_ARITIES}

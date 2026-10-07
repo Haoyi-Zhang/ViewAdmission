@@ -49,6 +49,28 @@ The saved unit-test report records 60 passing tests; the current source defines
 76 discoverable methods. The retained pass count covers that saved run, not a
 verified run of the entire current suite.
 
+Current factorized checking stores each untagged modular base total once per
+historical join key, rather than repeating it in every round. Round-specific
+tagged sums, challenge derivation/order, complete commitments, integer envelopes,
+zero-key retention and all report fields are unchanged. This reduces repeated
+untagged additions/storage, not sensitive input scans or the randomized error
+bound. Frozen timings and allocation diagnostics precede this change.
+
+Three separate portable methods use owned benign integer relations, independent
+nested-loop replay/expanded fingerprint definitions, signed cancellation,
+rounds 1/2/8 and ordinary logical publication. They need only current included
+sources and the standard library, with no network, provider or external target:
+
+```sh
+python -B -m unittest discover -s regressions -p test_group_totals.py -v
+```
+
+The scientific CI runs them in a separate required step and preserves its log.
+They do not enter `tests/`, its 76-method inventory or the frozen 60-test record.
+These narrow finite checks are portable; the complete POSIX reproduction above
+is unchanged and is not claimed rerun or cross-platform validated. No new
+latency, memory measurement, soundness probability or physical recovery claim.
+
 The retained results/execution.json records the frozen run, and a fresh output
 has its own execution.json. verify_results.py reconciles saved raw rows; it does
 not infer new executions from past pass markers. Full output must match the
