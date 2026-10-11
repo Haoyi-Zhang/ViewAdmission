@@ -1,6 +1,6 @@
 # Arguments, counterexamples, and executable correspondence
 
-This note expands the paper��s proofs and maps each proof obligation to code and
+This note expands the paper’s proofs and maps each proof obligation to code and
 raw evidence.  Finite checks support the implementation and boundary cases; they
 are not represented as machine-checked general proofs.
 
@@ -20,7 +20,7 @@ J(R_A+d_R, S_B+d_S)
 
 Selection and grouping are finite linear maps, so updating them by the induced
 delta produces `Q(R_h,S_h)` when the complete anchor was exactly `Q(R_A,S_B)`.
-The order ��update R then join d_S against R_h�� is a factorization of the
+The order “update R then join d_S against R_h” is a factorization of the
 algebraic expansion, not a durability order.
 
 **Counterexample to the missing cross term.**  Start from empty operands and
@@ -36,7 +36,7 @@ zero, while `J(d_R,d_S)` is the entire target join.
   and therefore fails 400;
 - `tests/test_recovery.py::test_cross_term_needed`.
 
-This argument is established IVM algebra.  It is retained to make the producer��s
+This argument is established IVM algebra.  It is retained to make the producer’s
 precondition and the endpoint gap explicit.
 
 ## B. Exact deltas preserve anchor residual
@@ -211,7 +211,7 @@ selection residual fingerprints have degree at most two, join residuals degree
 at most three, and grouped residuals degree one.  Integer-envelope admission
 ensures at least one nonzero integer coefficient remains nonzero in the field.
 The residual fingerprint is therefore a nonzero polynomial of degree at most
-three.  Schwartz�CZippel bounds its root probability under a uniform challenge by
+three.  Schwartz–Zippel bounds its root probability under a uniform challenge by
 `3/q`.  Since total acceptance implies this one residual vanishes, no union
 bound over five components is necessary.  Independent challenges multiply the
 bound to `(3/q)^r`.
@@ -294,8 +294,8 @@ For sensitive-cell indicators `X_j`, linearity of expectation yields
 This lower bound is tied to the absence of a trusted synopsis depending on the
 cells.  Authenticated indexes, maintained digests, proof objects, interactive
 provers, and trusted hardware invalidate its premise by supplying additional
-information.  The result therefore supports only ��avoid expected join
-expansion,�� never ��sublinear verification.��
+information.  The result therefore supports only “avoid expected join
+expansion,” never “sublinear verification.”
 
 ## H. Logical publication safety
 
@@ -324,7 +324,7 @@ a union bound gives at most A*(3/q)^r; repeated reads are not additional trials.
 **Executable correspondence.**
 
 - `recovery/publication.py`;
-- five targets �� 720 object flush orders �� 13 crash cuts = 46,800 raw cases;
+- five targets × 720 object flush orders × 13 crash cuts = 46,800 raw cases;
 - all publication invariant columns are true in
   `results/publication.csv` and summary;
 - `tests/test_recovery.py::test_publication_fence` and
@@ -339,7 +339,7 @@ Construct two histories with identical server durable state: the server commits
 prefix `h` and sends a reply.  In one history the reply reaches the client; in
 the other it is lost just before the crash.  Any server-only recovery algorithm
 sees the same durable log and marker in both histories.  It cannot output two
-different ��last client-observed�� answers.  Receiver evidence or an external
+different “last client-observed” answers.  Receiver evidence or an external
 protocol is necessary.
 
 `cases/case-d.json`, `check_cases.py`, and 120 receipt/effect schedules encode
@@ -358,5 +358,5 @@ stored/checked as metadata.  `cases/case-e.json` is the executable witness.
 The artifact establishes exact results for its frozen finite domains, execution
 paths, and logical schedules.  It does not establish workload prevalence,
 production speed, public authenticity, storage physics, or generalized SQL
-coverage.  The paper��s algebraic and lower-bound proofs are human-readable
+coverage.  The paper’s algebraic and lower-bound proofs are human-readable
 arguments, not proof-assistant output.

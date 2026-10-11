@@ -107,7 +107,7 @@ commitment and not a signature.
 
 The SQLite checker has its own parser and query realization.  Mode `both`
 reconstructs and compares anchor plus target; mode `target` reconstructs only the
-authorized target.  These are exact executable oracles within SQLite��s accepted
+authorized target.  These are exact executable oracles within SQLite’s accepted
 integer envelope, but they materialize the expected join.
 
 ### Structural mode
