@@ -15,7 +15,7 @@ from recovery.publication import Store,PARTS,RecoveryPending
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--poison",action="store_true")
-    ap.add_argument("--admission",choices=("both","target","structural","factorized"),default="factorized")
+    ap.add_argument("--admission",choices=("both","target","structural","streaming","factorized"),default="factorized")
     args=ap.parse_args()
     records=json.loads((Path(__file__).resolve().parent/"inputs/small.json").read_text())
     log=log_index([Epoch(e["id"],tuple(map(tuple,e["r"])),tuple(map(tuple,e["s"]))) for e in records])

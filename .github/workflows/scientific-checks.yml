@@ -48,3 +48,18 @@ jobs:
             group-total-regressions.log
           if-no-files-found: warn
           retention-days: 14
+      - name: Paired current admission and lifecycle measurements
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=10s 180s python -B admission_benchmark.py --out admission-output --repeats 1 2>&1 | tee admission-checks.log
+      - name: Preserve paired admission outputs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: admission-outputs
+          path: |
+            admission-output/
+            admission-checks.log
+          if-no-files-found: warn
+          retention-days: 14

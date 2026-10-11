@@ -103,7 +103,8 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
 
     ``both`` checks the anchor and target with independent SQLite evaluation;
     ``target`` checks only the target with SQLite; ``structural`` uses the exact
-    output-sensitive checker; and ``factorized`` commits the target before a
+    output-sensitive checker; ``streaming`` uses the exact canonical merge;
+    and ``factorized`` commits the target before a
     fresh post-commit challenge.  A rejected fallback is checked again.
 
     Supplying seeds is only for deterministic experiments.  If factorized
@@ -121,9 +122,10 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
         fresh_seed,
         verify_factorized,
         verify_structural,
+        verify_streaming,
     )
-    if admission not in {"both", "target", "structural", "factorized"}:
-        raise ValueError("admission must be both, target, structural, or factorized")
+    if admission not in {"both", "target", "structural", "streaming", "factorized"}:
+        raise ValueError("admission must be both, target, structural, streaming, or factorized")
     records = [e.encode() for e in log.values()]
     used_seed: bytes | None = None
 
@@ -135,6 +137,8 @@ def guarded_recover(log: dict[int, Epoch], h: int, rc: Iterable[int],
             verify_replay(records, h, candidate["recovered"], oracle)
         elif admission == "structural":
             verify_structural(records, h, candidate["recovered"])
+        elif admission == "streaming":
+            verify_streaming(records, h, candidate["recovered"])
         else:
             commitment = commit_image(candidate["recovered"])
             current_seed = fresh_seed() if challenge is None else _seed_bytes(challenge)

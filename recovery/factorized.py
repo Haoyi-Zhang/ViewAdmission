@@ -1,7 +1,9 @@
 """Independent exact and post-commit randomized admission checkers.
 
 The module deliberately imports neither the producer algebra nor the recovery
-engine.  ``verify_structural`` is an exact output-sensitive baseline: it
+engine.  ``verify_streaming`` validates bases exactly and merge-checks the
+sorted candidate's derived relations with constant cursor state.
+``verify_structural`` is the retained exact output-sensitive baseline: it
 materializes the target base relations but never materializes an expected join.
 ``verify_factorized`` verifies the same fixed five-relation image with
 factorized polynomial fingerprints.  It scans the authoritative prefix and the
@@ -423,6 +425,77 @@ def verify_structural(records: Any, durable_h: Any, recovered: Any) -> bool:
             grouped[(key,)] = value
     if not equals(candidate_rows["grouped"], grouped):
         raise FactorizedRejected("candidate group result differs from authoritative replay")
+    return True
+
+
+def verify_streaming(records: Any, durable_h: Any, recovered: Any) -> bool:
+    """Same-information exact admission using the canonical candidate bases.
+
+    Unsorted signed authority still requires an epoch index and one exact base
+    aggregation map at a time. After comparison that map is released. No
+    historical-key index, selection map, join map, or grouped map is built.
+    The candidate is not trusted until both base comparisons succeed.
+    """
+    candidate = _image(recovered, nonnegative=True)
+    log, h = _authority(records, durable_h)
+    for side in ("r", "s"):
+        aggregate = _aggregate(log, h, side)
+        rows = candidate[side]
+        if len(rows) != len(aggregate) or any(
+                aggregate.get((key, value)) != weight for key, value, weight in rows):
+            raise FactorizedRejected("candidate base relation differs from authoritative replay")
+        # Positive canonical candidate weights and exact equality also establish
+        # that the target base is a bag, without a randomized sign inference.
+        del aggregate
+
+    r, s = candidate["r"], candidate["s"]
+    selection = candidate["selection"]
+    selected = 0
+    for row in r:
+        if row[1] % 2 == 0:
+            if selected == len(selection) or selection[selected] != row:
+                raise FactorizedRejected("candidate selection differs from authoritative replay")
+            selected += 1
+    if selected != len(selection):
+        raise FactorizedRejected("candidate selection contains extras")
+
+    joined, grouped = candidate["joined"], candidate["grouped"]
+    ri = si = ji = gi = 0
+    while ri < len(r) and si < len(s):
+        rk, sk = r[ri][0], s[si][0]
+        if rk < sk:
+            while ri < len(r) and r[ri][0] == rk:
+                ri += 1
+            continue
+        if sk < rk:
+            while si < len(s) and s[si][0] == sk:
+                si += 1
+            continue
+        re, se = ri, si
+        rm = sm = 0
+        while re < len(r) and r[re][0] == rk:
+            rm += r[re][2]
+            re += 1
+        while se < len(s) and s[se][0] == rk:
+            sm += s[se][2]
+            se += 1
+        # Canonical base order induces exactly the canonical join order. Compare
+        # products directly to resident rows; do not allocate an expected tuple.
+        for left in range(ri, re):
+            for right in range(si, se):
+                if ji == len(joined):
+                    raise FactorizedRejected("candidate join is incomplete")
+                row = joined[ji]
+                if (row[0] != rk or row[1] != r[left][1] or row[2] != s[right][1]
+                        or row[3] != r[left][2] * s[right][2]):
+                    raise FactorizedRejected("candidate join tuple is incorrect")
+                ji += 1
+        if gi == len(grouped) or grouped[gi][0] != rk or grouped[gi][1] != rm * sm:
+            raise FactorizedRejected("candidate group result differs from authoritative replay")
+        gi += 1
+        ri, si = re, se
+    if ji != len(joined) or gi != len(grouped):
+        raise FactorizedRejected("candidate join or grouped result contains extras")
     return True
 
 

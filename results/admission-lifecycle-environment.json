@@ -1,0 +1,18 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.28000-SP0",
+  "machine": "AMD64",
+  "workers": 1,
+  "repeats": 3,
+  "modes": [
+    "target",
+    "structural",
+    "streaming",
+    "factorized"
+  ],
+  "timing": "fresh process; untraced; standalone checker and complete lifecycle measured in separate processes",
+  "allocation": "separate fresh processes; tracemalloc; inputs through one committed generation and reentry",
+  "RSS": "process high-water working set, including interpreter/native allocation",
+  "entropy": "deterministic fixture only; no production soundness estimate",
+  "retention": "one generation; no reclamation or many-attempt memory bound"
+}

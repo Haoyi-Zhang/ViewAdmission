@@ -107,7 +107,7 @@ commitment and not a signature.
 
 The SQLite checker has its own parser and query realization.  Mode `both`
 reconstructs and compares anchor plus target; mode `target` reconstructs only the
-authorized target.  These are exact executable oracles within SQLite’s accepted
+authorized target.  These are exact executable oracles within SQLite��s accepted
 integer envelope, but they materialize the expected join.
 
 ### Structural mode
@@ -118,6 +118,22 @@ product; requires candidate join support cardinality
 `sum_k |supp R_h(k,.)| |supp S_h(k,.)|`; and compares grouped sums.  Canonical
 uniqueness plus product/support equality makes it exact without constructing the
 expected join.
+
+### Exact sorted-merge alternative
+
+`streaming` is a target-only Store mode with the same authority, candidate,
+metadata, immutable-session commitment and publication gate. It independently
+aggregates one authoritative base at a time and checks equality against the
+canonical candidate base (equal support size and every candidate weight).
+Each map is released after comparison. Positive canonical candidate weights
+then establish nonnegative target bases exactly. Selection is the even-payload
+subsequence of the validated R table. Matching base-key blocks generate join
+products in canonical order; each is compared directly to the next candidate
+row. The grouped row must equal the product of the two block masses. Cursor
+exhaustion rejects omissions/extras. No expected join relation or derived map
+is allocated. Exact authority aggregation still requires O(E+B_max) state;
+only derived-view cursors are O(1). This is not a trusted synopsis, a sorted-log
+assumption or a constant-total-space claim.
 
 ## 6. Post-commit factorized admission
 

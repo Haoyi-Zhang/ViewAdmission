@@ -10,7 +10,7 @@ import hashlib
 import json
 from .factorized import (FIELD, MAX_INT, FactorizedRejected, _authority,
                          _seed_bytes, commit_image, fresh_seed,
-                         verify_factorized, verify_structural)
+                         verify_factorized, verify_structural, verify_streaming)
 from .checker import verify_replay
 
 PARTS = ("r", "s", "selection", "joined", "grouped", "metadata")
@@ -29,7 +29,7 @@ class Store:
     def __init__(self, initial: dict, *, records: list | None = None,
                  target: int = 0, mode: str = "factorized", rounds: int = 2,
                  _entropy=None):
-        if mode not in {"factorized", "structural", "target"}:
+        if mode not in {"factorized", "structural", "streaming", "target"}:
             raise ValueError("unsupported mode")
         if type(rounds) is not int or not 1 <= rounds <= 8:
             raise ValueError("invalid rounds")
@@ -115,6 +115,8 @@ class Store:
                                   rounds=self.__config["rounds"])
             elif self.__config["mode"] == "structural":
                 verify_structural(self.__records, self.__config["target"], candidate)
+            elif self.__config["mode"] == "streaming":
+                verify_streaming(self.__records, self.__config["target"], candidate)
             else:
                 verify_replay(self.__records, self.__config["target"], candidate)
         except ValueError:

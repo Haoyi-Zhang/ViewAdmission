@@ -29,8 +29,8 @@ def setup(s,image=TARGET):
     s.prepare(image);sid=s.commit();s.challenge();s.admit();return sid
 def flush(s):
     for p in PARTS:s.flush(p)
-def protocol_rows():
-    for mode in ("structural","factorized","target"):
+def protocol_rows(modes=("structural","factorized","target")):
+    for mode in modes:
         s=store(mode);s.prepare(TARGET);flush(s)
         yield {"mode":mode,"case":"unadmitted-all-flushed","rejected":rejects(s.publish)}
         s=store(mode);setup(s);flush(s)
@@ -73,14 +73,16 @@ def protocol_rows():
         yield {"mode":"factorized","case":"repeat-seed-"+type(value).__name__,"rejected":rejects(s.challenge)}
         log=log_index([Epoch(1,((1,2,1),),((1,3,1),))]);old=evaluate({},{});old.joined[(99,99,99)]=1
         yield {"mode":"factorized","case":"equivalent-fallback-"+type(value).__name__,"rejected":rejects(lambda:guarded_recover(log,1,[],[],old,admission="factorized",seed=seed,fallback_seed=value))}
-def domain_rows():
+def domain_rows(include_streaming=False):
     M=fp.MAX_INT
     cases=[("variation",[{"id":1,"r":[[0,0,M]],"s":[]},{"id":2,"r":[[0,0,-M]],"s":[]},{"id":3,"r":[[0,0,1]],"s":[[0,0,1]]}],encode_image(evaluate({(0,0):1},{(0,0):1})),False),
            ("positive-endpoint",[{"id":1,"r":[[0,0,M]],"s":[[0,0,1]]}],encode_image(evaluate({(0,0):M},{(0,0):1})),True),
            ("negative-minimum",[{"id":1,"r":[[0,0,-(1<<63)]],"s":[]}],EMPTY,False),
            ("negative-nonbag",[{"id":1,"r":[[0,0,-M]],"s":[]}],EMPTY,False)]
     for name,records,image,expected in cases:
-        for mode,fun in (("target",verify_replay),("structural",fp.verify_structural),("factorized",fp.verify_factorized)):
+        methods=[("target",verify_replay),("structural",fp.verify_structural),("factorized",fp.verify_factorized)]
+        if include_streaming:methods.append(("streaming",fp.verify_streaming))
+        for mode,fun in methods:
             kw={"commitment":fp.commit_image(image),"seed":b'x'*32} if mode=="factorized" else {}
             try:fun(records,len(records),image,**kw);accepted=True
             except ValueError:accepted=False

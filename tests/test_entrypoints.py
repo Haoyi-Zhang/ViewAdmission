@@ -8,7 +8,7 @@ class EntryPointTests(unittest.TestCase):
         result=subprocess.run([sys.executable,"-c",code],cwd=BASE,capture_output=True,text=True,timeout=20)
         self.assertEqual(result.returncode,0,result.stderr)
     def test_poisoned_demo_uses_store_admission(self):
-        for mode in ("structural","factorized","target","both"):
+        for mode in ("structural","streaming","factorized","target","both"):
             result=subprocess.run([sys.executable,"demo.py","--poison","--admission",mode],cwd=BASE,capture_output=True,text=True,timeout=20)
             self.assertEqual(result.returncode,0,result.stderr)
             payload=json.loads(result.stdout)

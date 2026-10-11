@@ -1,6 +1,6 @@
 # Arguments, counterexamples, and executable correspondence
 
-This note expands the paper’s proofs and maps each proof obligation to code and
+This note expands the paper��s proofs and maps each proof obligation to code and
 raw evidence.  Finite checks support the implementation and boundary cases; they
 are not represented as machine-checked general proofs.
 
@@ -20,7 +20,7 @@ J(R_A+d_R, S_B+d_S)
 
 Selection and grouping are finite linear maps, so updating them by the induced
 delta produces `Q(R_h,S_h)` when the complete anchor was exactly `Q(R_A,S_B)`.
-The order “update R then join d_S against R_h” is a factorization of the
+The order ��update R then join d_S against R_h�� is a factorization of the
 algebraic expansion, not a durability order.
 
 **Counterexample to the missing cross term.**  Start from empty operands and
@@ -36,7 +36,7 @@ zero, while `J(d_R,d_S)` is the entire target join.
   and therefore fails 400;
 - `tests/test_recovery.py::test_cross_term_needed`.
 
-This argument is established IVM algebra.  It is retained to make the producer’s
+This argument is established IVM algebra.  It is retained to make the producer��s
 precondition and the endpoint gap explicit.
 
 ## B. Exact deltas preserve anchor residual
@@ -117,6 +117,61 @@ and canceling logs (results/memory_controls.csv).
 - `results/cuts.csv`: `structural_ok=1` in all 11,529 rows;
 - `results/workloads.csv`: all 180 generated rows accept.
 
+## C.1 Exact sorted-merge admission
+
+`verify_streaming` uses the same independently supplied authority and complete
+canonical candidate as the target checkers. For one side, canonical uniqueness,
+equal support sizes and equal weights for every candidate tuple imply equality
+to the independently aggregated target map: the candidate support is a subset
+of a finite support of the same size. This also excludes negative target weights.
+Release the map and repeat for the other side. The candidate bases become valid
+inputs for the derived checks only after both exact comparisons.
+
+Selection consumes exactly the even-payload subsequence of validated R. Its
+cursor always names the first unmatched selected row; equality at each advance
+and exhaustion exclude wrong, omitted or extra selected rows.
+
+The two base cursors advance monotonically through key blocks. A nonmatching
+key contributes no join or group and is skipped. For a matching key, strict
+base order makes the left-major/right-minor Cartesian traversal equal to the
+canonical (key,left,right) order. The join cursor names the first unmatched
+candidate row. Each product comparison preserves exact prefix equality, and
+the final exhaustion check excludes extras. A missing row rejects immediately;
+no suffix of the expected join is expanded after rejection. The group cursor
+similarly consumes one row per matching key with weight equal to the product
+of the block masses. Positive base weights make all those products nonzero.
+Initialization has empty matched prefixes; each advance preserves them; finite
+base blocks and candidate arrays ensure termination. On termination all five
+relations equal the specified image; conversely the correct image passes every
+comparison. This proves zero-error exactness on the common integer domain.
+
+Authority parsing/indexing and aggregation cost O(N+L_all) expected dictionary
+operations and O(E+B_max) peak state, with one base map at a time. Derived
+scans/products cost O(C): even for a wrong short join, at most C_join+1 products
+are attempted before rejection. Cursors and masses use O(1) derived-view state.
+There is no historical-key map in that phase and no expected join relation.
+Unsorted signed authority still needs its exact aggregation map; no stronger
+streaming-authority or total-memory claim follows from sorted candidate bases.
+
+Executable correspondence: `recovery/factorized.py::verify_streaming`,
+`recovery/engine.py::guarded_recover`, and `recovery/publication.py::Store.admit`.
+The committed Store descriptor binds the selected mode. `tests/test_streaming.py`
+compares 112 correct targets and 560 component mutations per method against an
+independent nested-loop specification, SQL-both, SQL-target, structural, streaming
+and factorized checking; it executes 208 paired direct/fallback crash/reentry
+schedules in the four actual target-only Store modes. The actual Store checker
+call is asserted, not inferred from standalone agreement.
+
+`admission_benchmark.py` measures input construction through producer,
+authority copy, prepare, commit, admission, flush, publication, service and
+reentry in fresh subprocesses. Checker-only allocation and untraced timing use
+separate processes. `results/admission-lifecycle.csv` and its environment JSON
+preserve current-source host diagnostics. Tracemalloc and process peak RSS are
+separate metrics; snapshots and resident objects are not excluded from the
+lifecycle peak. One generation is retained; these measurements do not prove
+reclamation or bounds for arbitrarily many attempts. Historical cancellation
+can make randomized state worse than exact aggregation with zero deletion.
+
 ## D. Factorized expected join identity
 
 For one round, assign independent field tags `x_k`, `y_a`, and `z_b`.  The direct
@@ -156,7 +211,7 @@ selection residual fingerprints have degree at most two, join residuals degree
 at most three, and grouped residuals degree one.  Integer-envelope admission
 ensures at least one nonzero integer coefficient remains nonzero in the field.
 The residual fingerprint is therefore a nonzero polynomial of degree at most
-three.  Schwartz–Zippel bounds its root probability under a uniform challenge by
+three.  Schwartz�CZippel bounds its root probability under a uniform challenge by
 `3/q`.  Since total acceptance implies this one residual vanishes, no union
 bound over five components is necessary.  Independent challenges multiply the
 bound to `(3/q)^r`.
@@ -239,8 +294,8 @@ For sensitive-cell indicators `X_j`, linearity of expectation yields
 This lower bound is tied to the absence of a trusted synopsis depending on the
 cells.  Authenticated indexes, maintained digests, proof objects, interactive
 provers, and trusted hardware invalidate its premise by supplying additional
-information.  The result therefore supports only “avoid expected join
-expansion,” never “sublinear verification.”
+information.  The result therefore supports only ��avoid expected join
+expansion,�� never ��sublinear verification.��
 
 ## H. Logical publication safety
 
@@ -269,7 +324,7 @@ a union bound gives at most A*(3/q)^r; repeated reads are not additional trials.
 **Executable correspondence.**
 
 - `recovery/publication.py`;
-- five targets × 720 object flush orders × 13 crash cuts = 46,800 raw cases;
+- five targets �� 720 object flush orders �� 13 crash cuts = 46,800 raw cases;
 - all publication invariant columns are true in
   `results/publication.csv` and summary;
 - `tests/test_recovery.py::test_publication_fence` and
@@ -284,7 +339,7 @@ Construct two histories with identical server durable state: the server commits
 prefix `h` and sends a reply.  In one history the reply reaches the client; in
 the other it is lost just before the crash.  Any server-only recovery algorithm
 sees the same durable log and marker in both histories.  It cannot output two
-different “last client-observed” answers.  Receiver evidence or an external
+different ��last client-observed�� answers.  Receiver evidence or an external
 protocol is necessary.
 
 `cases/case-d.json`, `check_cases.py`, and 120 receipt/effect schedules encode
@@ -303,5 +358,5 @@ stored/checked as metadata.  `cases/case-e.json` is the executable witness.
 The artifact establishes exact results for its frozen finite domains, execution
 paths, and logical schedules.  It does not establish workload prevalence,
 production speed, public authenticity, storage physics, or generalized SQL
-coverage.  The paper’s algebraic and lower-bound proofs are human-readable
+coverage.  The paper��s algebraic and lower-bound proofs are human-readable
 arguments, not proof-assistant output.
