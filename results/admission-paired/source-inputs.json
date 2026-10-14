@@ -1,0 +1,16 @@
+{
+  "normalization": "UTF-8/LF",
+  "files": {
+    "admission_benchmark.py": "ba77c170a5f2a2a10920172caa1371a3a282a693896192168e13af311e0eb6c7",
+    "recovery/__init__.py": "273425b36d395209654243583c7f73c9b8b8a7ad53449087313005900702e8cc",
+    "recovery/algebra.py": "59c958719897a5389e8d42b8076afcf960b572986802f0531961354bc5c959f3",
+    "recovery/checker.py": "0e7db43730ab37cdee51a9f7bbe772f03303938eb18b40c58a9fb220e2316912",
+    "recovery/engine.py": "503894ba0c310304c907a19f4fb3cad256e82b02bd2fff1505246de59804b6aa",
+    "recovery/factorized.py": "7b4b960ee06b7d0cc89c831fe838710d94082d5760567aed4124930547b48f28",
+    "recovery/fixtures.py": "f9f3886a937bb6223a6115ce47c4332dc34fcc2043779abcf483891bcd29e473",
+    "recovery/publication.py": "256ca6b32748b483d7c8bba9cbc93663f88d697c76513ec5e4d45ddc194f2a86",
+    "inputs/generated-16.json": "71dc3445ccad12877c644b95ba969cce4a0f3c675bcf40cb27217bc6a34f0a20",
+    "inputs/generated-64.json": "b78a9211a379ebe9420827fe8e9111772d794e96aa8a315a1f0e5fcfd83927b8",
+    "inputs/generated-256.json": "5beaa1c1cc173fe119d6347922965b6fb1739ffbec25ba3d2ecbd2f3c10baf59"
+  }
+}

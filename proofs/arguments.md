@@ -165,8 +165,9 @@ call is asserted, not inferred from standalone agreement.
 `admission_benchmark.py` measures input construction through producer,
 authority copy, prepare, commit, admission, flush, publication, service and
 reentry in fresh subprocesses. Checker-only allocation and untraced timing use
-separate processes. `results/admission-lifecycle.csv` and its environment JSON
-preserve current-source host diagnostics. Tracemalloc and process peak RSS are
+separate processes. `results/admission-paired/summary.csv`, its raw samples,
+source-input bindings and environment JSON preserve current-source diagnostics.
+`results/admission-lifecycle.csv` retains the earlier study. Tracemalloc and process peak RSS are
 separate metrics; snapshots and resident objects are not excluded from the
 lifecycle peak. One generation is retained; these measurements do not prove
 reclamation or bounds for arbitrarily many attempts. Historical cancellation

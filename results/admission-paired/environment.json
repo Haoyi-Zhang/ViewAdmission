@@ -1,0 +1,42 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.28000-SP0",
+  "machine": "AMD64",
+  "workers": 1,
+  "repeats": 3,
+  "modes": [
+    "target",
+    "structural",
+    "streaming",
+    "factorized"
+  ],
+  "timing": "fresh process; untraced; standalone checker and complete lifecycle measured in separate processes",
+  "allocation": "separate fresh processes; tracemalloc; inputs through one committed generation and reentry",
+  "RSS": "process high-water working set, including interpreter/native allocation",
+  "entropy": "deterministic fixture only; no production soundness estimate",
+  "retention": "one generation; no reclamation or many-attempt memory bound",
+  "cpu": [
+    {
+      "Name": "12th Gen Intel(R) Core(TM) i7-12700KF",
+      "NumberOfCores": 12,
+      "NumberOfLogicalProcessors": 20
+    }
+  ],
+  "os": [
+    {
+      "Caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+      "Version": "10.0.28000",
+      "BuildNumber": "28000"
+    }
+  ],
+  "sqlite": "3.53.1",
+  "started_at": "2026-10-14T19:39:24.446764+00:00",
+  "finished_at": "2026-10-14T19:41:28.145833+00:00",
+  "resource_protocol": "measurement, four shared slots",
+  "physical_exclusive_host": false,
+  "measurement_processes": 432,
+  "paired_repetitions": 108,
+  "workload_mode_combinations": 36,
+  "source_binding": "source-inputs.json",
+  "source_inputs_unchanged": true
+}

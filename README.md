@@ -45,8 +45,8 @@ Resident inputs and the store's complete-candidate snapshots count toward total
 memory. The prime-field error bound is conditional on a fixed supported
 candidate and fresh independent challenges; binding does not make it zero error.
 
-The saved unit-test report records 60 passing tests; the current source defines
-82 discoverable methods. A CPython 3.12.14 native-Windows discovery run executed
+The saved unit-test report records 60 passing tests. Before the five saved-paired-
+measurement guards, source discovery found 82 methods. A CPython 3.12.14 native-Windows discovery run executed
 82: 79 passed, two failed and one errored because POSIX `resource` is unavailable.
 This is not a successful full POSIX reproduction. The six added streaming
 methods and three existing portable group-total regressions passed separately.
@@ -102,7 +102,7 @@ python3 -B -m unittest discover -s tests -p test_streaming.py -v
 python3 -B admission_benchmark.py --out paired-lifecycle --repeats 3
 ```
 
-The six tests include 112 targets and 560 component mutations per method against
+The six streaming tests include 112 targets and 560 component mutations per method against
 independent nested-loop expectations, SQL-both, SQL-target, structural, streaming
 and factorized checking. Four actual store modes execute 208 paired direct and
 fallback logical crash/reentry schedules without equation reuse. These checks
@@ -113,7 +113,7 @@ The benchmark uses a fresh child process for each measurement, one worker,
 three repetitions, identical inputs/candidate information, and the actual
 producer and store. SQL-both is an anchor-and-target diagnostic, not a store
 mode, and is not charged as a target-only lifecycle comparator. New output
-contains raw phase samples, summary.csv, and environment.json. The retained
+contains raw phase samples, summary.csv, and environment.json. The earlier retained
 `results/admission-lifecycle.csv` and environment JSON record Windows/CPython
 3.12.14 diagnostics for 36 workload/mode combinations (108 paired repetitions;
 four separate measurement processes per repetition). Times are untraced;
@@ -139,6 +139,36 @@ macros are unchanged; no current timing is attributed to the old Linux run.
 endpoint and publication coverage. It does not turn algebra controls into an
 empirical estimate of production false acceptance. Complexity accounting
 distinguishes all raw epoch records/rows from the deduplicated prefix rows.
+
+## Source-bound paired study
+
+`results/admission-paired` contains the adopted current-source run: 36 workload/
+mode combinations, three repetitions and four separate measurement processes
+per repetition, for 108 paired samples and 432 processes. The benchmark, seven
+recovery modules and three generated input files were captured before the run
+and unchanged afterward. Public source bindings normalize UTF-8 line endings
+for portable comparison. The environment records Windows 11 Pro build 28000,
+CPython 3.12.14, SQLite 3.53.1 and the Intel Core i7-12700KF.
+
+```sh
+python -B verify_admission_measurements.py
+python -B verify_admission_measurements.py --paper ../paper
+python -B -m unittest discover -s tests -p test_admission_measurements.py -v
+```
+
+The optional manuscript path must already exist. Reconciliation verifies all
+sample identities, admission/service results, lifecycle phases, medians and
+measured source/input bindings before generating the manuscript table. The five
+portable regression methods reject missing/duplicate samples, failed service,
+nonfinite or inconsistent summary values and incomplete bindings. They pass in
+ordinary and optimized Python without rerunning timings.
+
+Current measurements include the scalar untagged-key optimization. The earlier
+`admission-lifecycle.csv` remains a separate retained study, not a causal
+before/after optimization control. For Cartesian-128, current structural,
+streaming and factorized lifecycle peaks all round to 10.487 MiB. Canceled-key
+factorized auxiliary state remains 986,299 bytes, compared with 1,016 for
+streaming. The main manuscript uses the adopted current-source table.
 
 The scientific workflow is configured to run the complete command from this flat artifact
 repository root on Ubuntu 24.04/Python 3.12, with a 900-second whole-command

@@ -31,6 +31,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python -B -m unittest discover -s tests -p test_admission_measurements.py -v
+          python -B verify_admission_measurements.py
+      - name: Reproduce complete finite scientific outputs
+        shell: bash
+        run: |
+          set -euo pipefail
           timeout --signal=TERM --kill-after=10s 900s bash -c '
             set -euo pipefail
             ulimit -v 1048576
