@@ -27,6 +27,8 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=10s 90s python -B -m unittest discover -s regressions -p test_group_totals.py -v 2>&1 | tee group-total-regressions.log
+      - name: Validate cited source identity record
+        run: python -B -m unittest discover -s tests -p test_reference_sources.py -v
       - name: Reproduce and enforce all scientific failure gates
         shell: bash
         run: |
