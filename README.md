@@ -142,6 +142,18 @@ distinguishes all raw epoch records/rows from the deduplicated prefix rows.
 
 ## Source-bound paired study
 
+The three paper schematics are generated directly as embedded-font vector PDFs
+by `figures/draw_schematics.py` (Python/Matplotlib). This optional presentation
+dependency is separate from the standard-library scientific checks. The paper
+builder regenerates and copies these assets into its clean build directory.
+Two standard-library controls check the actual cut-membership and protocol-edge
+specifications without importing Matplotlib or changing scientific case counts.
+
+```sh
+python figures/draw_schematics.py --output-dir /tmp/viewadmission-figures
+python -B -m unittest discover -s regressions -p test_figure_contract.py -v
+```
+
 `results/admission-paired` contains the adopted current-source run: 36 workload/
 mode combinations, three repetitions and four separate measurement processes
 per repetition, for 108 paired samples and 432 processes. The benchmark, seven
