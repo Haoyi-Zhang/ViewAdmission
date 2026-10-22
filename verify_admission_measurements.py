@@ -93,6 +93,11 @@ def validate(raw,summary,environment,bindings,root=ROOT):
         require(path.is_relative_to(root.resolve()),'Source path escapes artifact')
         payload=path.read_text(encoding='utf-8').replace('\r\n','\n').encode('utf-8')
         require(hashlib.sha256(payload).hexdigest()==expected_digest,'Measured source/input changed: '+name)
+    if 'collection_driver' in bindings:
+        driver=bindings['collection_driver']
+        require(driver['file']=='collect_admission_measurements.py','Unknown collection driver')
+        payload=(root/driver['file']).read_text(encoding='utf-8').replace('\r\n','\n').encode('utf-8')
+        require(hashlib.sha256(payload).hexdigest()==driver['digest'],'Collection driver changed')
     return dict(samples=108,combinations=36,measurement_processes=432,source_inputs=len(files),matched=True)
 
 def table_tex(summary):
@@ -115,14 +120,14 @@ def table_tex(summary):
     lines.extend((r'\bottomrule',r'\end{tabularx}',r'\end{table}'))
     return '\n'.join(lines)+'\n'
 
-def verify_saved(paper=None):
-    folder=ROOT/'results/admission-paired'
+def verify_saved(paper=None, folder=None, root=ROOT):
+    folder=ROOT/'results/admission-paired' if folder is None else Path(folder)
     raw=json.loads((folder/'raw.json').read_text())
     with (folder/'summary.csv').open(newline='') as stream:
         summary=list(csv.DictReader(stream))
     environment=json.loads((folder/'environment.json').read_text())
     bindings=json.loads((folder/'source-inputs.json').read_text())
-    result=validate(raw,summary,environment,bindings)
+    result=validate(raw,summary,environment,bindings,root=root)
     if paper is not None:
         require(paper.is_dir(),'Manuscript directory missing')
         (paper/'generated-lifecycle.tex').write_text(table_tex(summary),encoding='utf-8')
@@ -131,4 +136,6 @@ def verify_saved(paper=None):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--paper',type=Path,help='Optional existing manuscript directory for the derived table')
-    print(json.dumps(verify_saved(parser.parse_args().paper)))
+    parser.add_argument('--results',type=Path,help='Paired result directory; defaults to the retained adopted run')
+    args=parser.parse_args()
+    print(json.dumps(verify_saved(args.paper,folder=args.results)))

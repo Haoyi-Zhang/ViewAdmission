@@ -99,7 +99,8 @@ binding. Cryptographic commitments and post-commit challenge rules are unchanged
 ```sh
 python3 -B demo.py --poison --admission streaming
 python3 -B -m unittest discover -s tests -p test_streaming.py -v
-python3 -B admission_benchmark.py --out paired-lifecycle --repeats 3
+python3 -B collect_admission_measurements.py --out paired-lifecycle
+python3 -B verify_admission_measurements.py --results paired-lifecycle
 ```
 
 The six streaming tests include 112 targets and 560 component mutations per method against
@@ -113,7 +114,12 @@ The benchmark uses a fresh child process for each measurement, one worker,
 three repetitions, identical inputs/candidate information, and the actual
 producer and store. SQL-both is an anchor-and-target diagnostic, not a store
 mode, and is not charged as a target-only lifecycle comparator. New output
-contains raw phase samples, summary.csv, and environment.json. The earlier retained
+contains raw phase samples, summary.csv, environment.json and source-inputs.json.
+The collection wrapper captures the measured benchmark, recovery modules and
+inputs before and after execution, records actual environment and process counts,
+and validates the completed paired results. The low-level admission_benchmark.py
+entry remains available for basic diagnostics but does not create those complete
+source bindings by itself. The earlier retained
 `results/admission-lifecycle.csv` and environment JSON record Windows/CPython
 3.12.14 diagnostics for 36 workload/mode combinations (108 paired repetitions;
 four separate measurement processes per repetition). Times are untraced;
@@ -165,10 +171,13 @@ CPython 3.12.14, SQLite 3.53.1 and the Intel Core i7-12700KF.
 ```sh
 python -B verify_admission_measurements.py
 python -B verify_admission_measurements.py --paper ../paper
+python -B verify_admission_measurements.py --results paired-lifecycle --paper ../paper
 python -B -m unittest discover -s tests -p test_admission_measurements.py -v
 ```
 
-The optional manuscript path must already exist. Reconciliation verifies all
+The optional manuscript path must already exist. Choose --results explicitly
+when adopting a newly collected run; the default keeps the retained paper run.
+Reconciliation verifies all
 sample identities, admission/service results, lifecycle phases, medians and
 measured source/input bindings before generating the manuscript table. The five
 portable regression methods reject missing/duplicate samples, failed service,
