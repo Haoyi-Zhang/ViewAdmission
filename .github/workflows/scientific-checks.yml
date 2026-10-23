@@ -29,6 +29,10 @@ jobs:
           timeout --signal=TERM --kill-after=10s 90s python -B -m unittest discover -s regressions -p test_group_totals.py -v 2>&1 | tee group-total-regressions.log
       - name: Validate cited source identity record
         run: python -B -m unittest discover -s tests -p test_reference_sources.py -v
+      - name: Check asymmetric payload allocation evidence
+        run: |
+          python -B -m unittest discover -s tests -p test_payload_state_study.py -v
+          python -B payload_state_study.py --check results/payload-state.json
       - name: Validate schematic cut and protocol contracts
         run: python -B -m unittest discover -s regressions -p test_figure_contract.py -v
       - name: Reproduce and enforce all scientific failure gates

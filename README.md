@@ -1,6 +1,29 @@
 # Post-Commit Admission for Crash-Recovered Relational Views
 
-Finite, single-node five-relation recovery and admission model.
+Finite, single-node five-relation recovery and admission model. Exact
+sorted-merge admission is the zero-error choice for the supplied canonical
+candidate order; randomized fingerprints are an optional checker-state tradeoff,
+not a requirement for avoiding expected-join construction.
+
+## Asymmetric live-payload allocation control
+
+`payload_state_study.py` compares the existing exact sorted-merge and two-round
+factorized APIs at 64/256/1024 distinct left payloads, one right payload and
+one live join key. The retained `results/payload-state.json` contains all 18
+fresh-process samples and consumed source bindings. It measures checker-only
+Python allocations after resident inputs/candidate construction, not timing,
+RSS, store memory or a lower bound against all exact algorithms. Exact checking
+uses less at the smallest size; factorized checking uses less at the two larger
+sizes on the measured host. No ordering is a pass/fail criterion.
+
+```sh
+python -B payload_state_study.py --check results/payload-state.json
+python -B payload_state_study.py --out NEW_RESULT.json --tex NEW_TABLE.tex
+python -B -m unittest discover -s tests -p test_payload_state_study.py -v
+```
+
+Choose fresh output paths. The full project can also check the table with
+`--check results/payload-state.json --tex ../paper/generated-payload-state.tex`.
 
 ## Reproduction
 

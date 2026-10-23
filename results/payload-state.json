@@ -1,0 +1,281 @@
+{
+  "source_bindings": {
+    "payload_state_study.py": "1bce18ddd1bcaa7b2821224d98d9597d1073db884914848cfbd3ffc18d3f49ce",
+    "recovery/factorized.py": "7b4b960ee06b7d0cc89c831fe838710d94082d5760567aed4124930547b48f28"
+  },
+  "samples": [
+    {
+      "n": 64,
+      "mode": "streaming",
+      "accepted": true,
+      "authority_rows": 65,
+      "candidate_rows": 162,
+      "candidate_join_rows": 64,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": null,
+      "aux_live_python_bytes": 4184,
+      "aux_peak_python_bytes": 7080,
+      "repeat": 0
+    },
+    {
+      "n": 64,
+      "mode": "streaming",
+      "accepted": true,
+      "authority_rows": 65,
+      "candidate_rows": 162,
+      "candidate_join_rows": 64,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": null,
+      "aux_live_python_bytes": 4184,
+      "aux_peak_python_bytes": 7080,
+      "repeat": 1
+    },
+    {
+      "n": 64,
+      "mode": "streaming",
+      "accepted": true,
+      "authority_rows": 65,
+      "candidate_rows": 162,
+      "candidate_join_rows": 64,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": null,
+      "aux_live_python_bytes": 4184,
+      "aux_peak_python_bytes": 7080,
+      "repeat": 2
+    },
+    {
+      "n": 64,
+      "mode": "factorized",
+      "accepted": true,
+      "authority_rows": 65,
+      "candidate_rows": 162,
+      "candidate_join_rows": 64,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": 1,
+      "aux_live_python_bytes": 6177,
+      "aux_peak_python_bytes": 9294,
+      "repeat": 0
+    },
+    {
+      "n": 64,
+      "mode": "factorized",
+      "accepted": true,
+      "authority_rows": 65,
+      "candidate_rows": 162,
+      "candidate_join_rows": 64,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": 1,
+      "aux_live_python_bytes": 6177,
+      "aux_peak_python_bytes": 9294,
+      "repeat": 1
+    },
+    {
+      "n": 64,
+      "mode": "factorized",
+      "accepted": true,
+      "authority_rows": 65,
+      "candidate_rows": 162,
+      "candidate_join_rows": 64,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": 1,
+      "aux_live_python_bytes": 6177,
+      "aux_peak_python_bytes": 9294,
+      "repeat": 2
+    },
+    {
+      "n": 256,
+      "mode": "streaming",
+      "accepted": true,
+      "authority_rows": 257,
+      "candidate_rows": 642,
+      "candidate_join_rows": 256,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": null,
+      "aux_live_python_bytes": 14936,
+      "aux_peak_python_bytes": 24872,
+      "repeat": 0
+    },
+    {
+      "n": 256,
+      "mode": "streaming",
+      "accepted": true,
+      "authority_rows": 257,
+      "candidate_rows": 642,
+      "candidate_join_rows": 256,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": null,
+      "aux_live_python_bytes": 14936,
+      "aux_peak_python_bytes": 24872,
+      "repeat": 1
+    },
+    {
+      "n": 256,
+      "mode": "streaming",
+      "accepted": true,
+      "authority_rows": 257,
+      "candidate_rows": 642,
+      "candidate_join_rows": 256,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": null,
+      "aux_live_python_bytes": 14936,
+      "aux_peak_python_bytes": 24872,
+      "repeat": 2
+    },
+    {
+      "n": 256,
+      "mode": "factorized",
+      "accepted": true,
+      "authority_rows": 257,
+      "candidate_rows": 642,
+      "candidate_join_rows": 256,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": 1,
+      "aux_live_python_bytes": 6241,
+      "aux_peak_python_bytes": 9350,
+      "repeat": 0
+    },
+    {
+      "n": 256,
+      "mode": "factorized",
+      "accepted": true,
+      "authority_rows": 257,
+      "candidate_rows": 642,
+      "candidate_join_rows": 256,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": 1,
+      "aux_live_python_bytes": 6241,
+      "aux_peak_python_bytes": 9350,
+      "repeat": 1
+    },
+    {
+      "n": 256,
+      "mode": "factorized",
+      "accepted": true,
+      "authority_rows": 257,
+      "candidate_rows": 642,
+      "candidate_join_rows": 256,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": 1,
+      "aux_live_python_bytes": 6241,
+      "aux_peak_python_bytes": 9350,
+      "repeat": 2
+    },
+    {
+      "n": 1024,
+      "mode": "streaming",
+      "accepted": true,
+      "authority_rows": 1025,
+      "candidate_rows": 2562,
+      "candidate_join_rows": 1024,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": null,
+      "aux_live_python_bytes": 57944,
+      "aux_peak_python_bytes": 95528,
+      "repeat": 0
+    },
+    {
+      "n": 1024,
+      "mode": "streaming",
+      "accepted": true,
+      "authority_rows": 1025,
+      "candidate_rows": 2562,
+      "candidate_join_rows": 1024,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": null,
+      "aux_live_python_bytes": 57944,
+      "aux_peak_python_bytes": 95528,
+      "repeat": 1
+    },
+    {
+      "n": 1024,
+      "mode": "streaming",
+      "accepted": true,
+      "authority_rows": 1025,
+      "candidate_rows": 2562,
+      "candidate_join_rows": 1024,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": null,
+      "aux_live_python_bytes": 57944,
+      "aux_peak_python_bytes": 95528,
+      "repeat": 2
+    },
+    {
+      "n": 1024,
+      "mode": "factorized",
+      "accepted": true,
+      "authority_rows": 1025,
+      "candidate_rows": 2562,
+      "candidate_join_rows": 1024,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": 1,
+      "aux_live_python_bytes": 6241,
+      "aux_peak_python_bytes": 9478,
+      "repeat": 0
+    },
+    {
+      "n": 1024,
+      "mode": "factorized",
+      "accepted": true,
+      "authority_rows": 1025,
+      "candidate_rows": 2562,
+      "candidate_join_rows": 1024,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": 1,
+      "aux_live_python_bytes": 6241,
+      "aux_peak_python_bytes": 9478,
+      "repeat": 1
+    },
+    {
+      "n": 1024,
+      "mode": "factorized",
+      "accepted": true,
+      "authority_rows": 1025,
+      "candidate_rows": 2562,
+      "candidate_join_rows": 1024,
+      "live_join_keys": 1,
+      "reported_accumulator_keys": 1,
+      "aux_live_python_bytes": 6241,
+      "aux_peak_python_bytes": 9478,
+      "repeat": 2
+    }
+  ],
+  "summary": [
+    {
+      "n": 64,
+      "mode": "streaming",
+      "median_aux_peak_python_bytes": 7080
+    },
+    {
+      "n": 64,
+      "mode": "factorized",
+      "median_aux_peak_python_bytes": 9294
+    },
+    {
+      "n": 256,
+      "mode": "streaming",
+      "median_aux_peak_python_bytes": 24872
+    },
+    {
+      "n": 256,
+      "mode": "factorized",
+      "median_aux_peak_python_bytes": 9350
+    },
+    {
+      "n": 1024,
+      "mode": "streaming",
+      "median_aux_peak_python_bytes": 95528
+    },
+    {
+      "n": 1024,
+      "mode": "factorized",
+      "median_aux_peak_python_bytes": 9478
+    }
+  ],
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.28000-SP0",
+    "workers": 1,
+    "fresh_processes": 18
+  },
+  "scope": "Checker-only tracemalloc, excludes resident input and candidate; no timing, RSS or lifecycle claim"
+}
