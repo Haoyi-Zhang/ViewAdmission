@@ -25,7 +25,30 @@ python -B -m unittest discover -s tests -p test_payload_state_study.py -v
 Choose fresh output paths. The full project can also check the table with
 `--check results/payload-state.json --tex ../paper/generated-payload-state.tex`.
 
-## Reproduction
+## Upstream IVM input replay
+
+`upstream_workload.py` reads the retained MIT-licensed Feldera `do_join_test`
+input declarations, pins their upstream revision, and replays the bag-valid
+keys 1 and 2 through the owned engine and four same-information checkers. The
+complete signed-ZSet stream remains an explicit unsupported-domain control.
+See `external_inputs/NOTICE-feldera.md` for exact mapping, exclusions, license
+and source links. This is not an execution of Feldera or an observed recovery
+incident: mixed cuts, corrupt joins, no-summary admission and logical reentry
+are owned controls. Output arrays and decisions feed the manuscript's upstream
+replay subsection, not its historical timing tables.
+
+```sh
+python -B upstream_workload.py --out results/upstream-feldera.json
+python -B -m unittest discover -s tests -p test_upstream_workload.py -v
+```
+
+The recorded five prefixes produce 20 accepted endpoints, 100 component
+rejections and 20 checked replacement publications/reentries. The source
+workload does not by itself establish production demand for a verifier with
+no maintained synopsis. Exact sorted merge is the normal zero-error choice;
+factorized mode is an optional auxiliary-state tradeoff, not a latency gain.
+
+## Full reproduction
 
 From this directory run:
 

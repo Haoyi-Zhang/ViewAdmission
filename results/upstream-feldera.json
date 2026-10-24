@@ -1,0 +1,1229 @@
+{
+  "source_revision": "ae84fbb9fdb66d1d9e88154ccd9deeac12185007",
+  "provenance": "upstream IVM regression inputs; owned recovery and corruption controls",
+  "retained_keys": [
+    1,
+    2
+  ],
+  "records": [
+    {
+      "id": 1,
+      "r": [
+        [
+          1,
+          0,
+          1
+        ],
+        [
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          2,
+          3
+        ],
+        [
+          2,
+          3,
+          4
+        ]
+      ],
+      "s": [
+        [
+          2,
+          6,
+          3
+        ],
+        [
+          2,
+          7,
+          4
+        ]
+      ]
+    },
+    {
+      "id": 2,
+      "r": [
+        [
+          1,
+          0,
+          1
+        ]
+      ],
+      "s": [
+        [
+          1,
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "id": 3,
+      "r": [
+        [
+          1,
+          0,
+          1
+        ]
+      ],
+      "s": []
+    },
+    {
+      "id": 4,
+      "r": [],
+      "s": []
+    },
+    {
+      "id": 5,
+      "r": [
+        [
+          1,
+          0,
+          0
+        ]
+      ],
+      "s": []
+    }
+  ],
+  "rows": [
+    {
+      "h": 1,
+      "r_cut": [
+        1
+      ],
+      "s_cut": [],
+      "candidate": {
+        "r": [
+          [
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            1
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "poison": {
+        "r": [
+          [
+            1,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            1
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            1,
+            0,
+            1,
+            1
+          ],
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "join_rows": 4,
+      "candidate_rows": 13,
+      "accepted": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      },
+      "component_rejections": {
+        "target": 5,
+        "structural": 5,
+        "streaming": 5,
+        "factorized": 5
+      },
+      "checked_fallback_published": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      }
+    },
+    {
+      "h": 2,
+      "r_cut": [
+        1
+      ],
+      "s_cut": [
+        2
+      ],
+      "candidate": {
+        "r": [
+          [
+            1,
+            0,
+            2
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            1,
+            0,
+            1,
+            2
+          ],
+          [
+            1,
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "poison": {
+        "r": [
+          [
+            1,
+            0,
+            2
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            1,
+            0,
+            1,
+            3
+          ],
+          [
+            1,
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "join_rows": 6,
+      "candidate_rows": 17,
+      "accepted": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      },
+      "component_rejections": {
+        "target": 5,
+        "structural": 5,
+        "streaming": 5,
+        "factorized": 5
+      },
+      "checked_fallback_published": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      }
+    },
+    {
+      "h": 3,
+      "r_cut": [
+        1,
+        3
+      ],
+      "s_cut": [
+        2
+      ],
+      "candidate": {
+        "r": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            1,
+            0,
+            1,
+            3
+          ],
+          [
+            1,
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "poison": {
+        "r": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            1,
+            0,
+            1,
+            4
+          ],
+          [
+            1,
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "join_rows": 6,
+      "candidate_rows": 17,
+      "accepted": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      },
+      "component_rejections": {
+        "target": 5,
+        "structural": 5,
+        "streaming": 5,
+        "factorized": 5
+      },
+      "checked_fallback_published": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      }
+    },
+    {
+      "h": 4,
+      "r_cut": [
+        1,
+        3
+      ],
+      "s_cut": [
+        2,
+        4
+      ],
+      "candidate": {
+        "r": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            1,
+            0,
+            1,
+            3
+          ],
+          [
+            1,
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "poison": {
+        "r": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            1,
+            0,
+            1,
+            4
+          ],
+          [
+            1,
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "join_rows": 6,
+      "candidate_rows": 17,
+      "accepted": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      },
+      "component_rejections": {
+        "target": 5,
+        "structural": 5,
+        "streaming": 5,
+        "factorized": 5
+      },
+      "checked_fallback_published": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      }
+    },
+    {
+      "h": 5,
+      "r_cut": [
+        1,
+        3,
+        5
+      ],
+      "s_cut": [
+        2,
+        4
+      ],
+      "candidate": {
+        "r": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            1,
+            0,
+            1,
+            3
+          ],
+          [
+            1,
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "poison": {
+        "r": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ]
+        ],
+        "s": [
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            2,
+            6,
+            3
+          ],
+          [
+            2,
+            7,
+            4
+          ]
+        ],
+        "selection": [
+          [
+            1,
+            0,
+            3
+          ],
+          [
+            2,
+            2,
+            3
+          ]
+        ],
+        "joined": [
+          [
+            1,
+            0,
+            1,
+            4
+          ],
+          [
+            1,
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            6,
+            9
+          ],
+          [
+            2,
+            2,
+            7,
+            12
+          ],
+          [
+            2,
+            3,
+            6,
+            12
+          ],
+          [
+            2,
+            3,
+            7,
+            16
+          ]
+        ],
+        "grouped": [
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            49
+          ]
+        ]
+      },
+      "join_rows": 6,
+      "candidate_rows": 17,
+      "accepted": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      },
+      "component_rejections": {
+        "target": 5,
+        "structural": 5,
+        "streaming": 5,
+        "factorized": 5
+      },
+      "checked_fallback_published": {
+        "target": true,
+        "structural": true,
+        "streaming": true,
+        "factorized": true
+      }
+    }
+  ],
+  "full_signed_stream": {
+    "target": "rejected: full signed stream outside nonnegative target domain",
+    "structural": "rejected: full signed stream outside nonnegative target domain",
+    "streaming": "rejected: full signed stream outside nonnegative target domain",
+    "factorized": "rejected: full signed stream outside nonnegative target domain"
+  },
+  "prefix_targets": 5,
+  "methods": 4,
+  "positive_checks": 20,
+  "component_rejections": 100,
+  "checked_publication_reentries": 20,
+  "trusted_maintained_synopsis": false,
+  "scope": "No Feldera execution, physical crash, observed incident, timing, or deployment-demand measurement"
+}
